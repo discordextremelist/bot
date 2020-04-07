@@ -82,6 +82,38 @@ async def on_guild_join(guild):
 
 
 @bot.event
+async def on_user_update(before, after):
+    if before.bot:
+        bot = db["bots"].find_one({"id": str(member.id)})
+        
+        if bot:
+            db["bots"].update_one({"id": str(before.id)}, {
+                "$set": {
+                    "name": after.name,
+                    "avatar": {
+                        "hash": after.avatar,
+                        "url": f"https://cdn.discordapp.com/avatars/{before.id}/{after.avatar}"
+                    }
+                }
+            })
+    else:
+        user = db["users"].find_one({"id": str(member.id)})
+        
+        if user:
+            db["users"].update_one({"id": str(before.id)}, {
+                "$set": {
+                    "name": after.name,
+                    "discrim": after.discriminator,
+                    "fullUsername": f"{after.name}#{after.discriminator}",
+                    "avatar": {
+                        "hash": after.avatar,
+                        "url": f"https://cdn.discordapp.com/avatars/{before.id}/{after.avatar}"
+                    }
+                }
+            })
+
+
+@bot.event
 async def on_member_join(member):
     if member.bot:
         bot = db["bots"].find_one({"id": str(member.id)})
