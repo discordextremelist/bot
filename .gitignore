@@ -132,3 +132,10 @@ dmypy.json
 
 # Configuration
 settings.json
+
+# Redis
+dump.rdb
+
+# IDEs
+.vscode/
+.idea/

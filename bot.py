@@ -18,11 +18,12 @@
 import colouredlogs, logging
 import datetime
 import discord
-import pymongo 
+from motor.motor_asyncio import AsyncIOMotorClient
 import json
 
 from colorama import Fore, init
 from discord.ext import commands, tasks
+from ext.context import EditingContext
 
 init()
 colouredlogs.install()
@@ -34,8 +35,7 @@ logging.basicConfig(level=logging.INFO)
 
 fr = Fore.RESET
 logging.info("Starting bot")
-MongoClient = pymongo.MongoClient(settings["mongo"]["uri"])
-db = MongoClient[settings["mongo"]["db"]]
+db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
 botExtensions = [
     "cogs.help",
     "cogs.utility",
@@ -59,6 +59,7 @@ else:
 bot.remove_command("help")
 bot.db = db
 bot.settings = settings
+bot.cmd_edits = {}
 
 if __name__ == "__main__":
     for ext in botExtensions:
@@ -148,6 +149,22 @@ async def on_member_join(member):
             if botCount >= 1:
                 await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])), reason="User is a Verified Developer on the website.")
 
+@bot.event
+async def on_command_error(ctx, error):
+    if error in (discord.Forbidden, commands.BotMissingPermissions, commands.CommandNotFound, commands.CheckFailure):
+        pass
 
+@bot.event
+async def on_message(msg):
+    if not msg.author.bot:
+        ctx = await bot.get_context(msg, cls=EditingContext)
+        await bot.invoke(ctx)
+
+
+@bot.event
+async def on_message_edit(old_msg, new_msg):
+    if not old_msg.author.bot and new_msg.content is not old_msg.content:
+        ctx = await bot.get_context(new_msg, cls=EditingContext)
+        await bot.invoke(ctx)
 
 bot.run(settings["token"], bot=True, reconnect=True)

@@ -49,7 +49,7 @@ class UtilityCog(commands.Cog):
             if user == None:
                 user = ctx.author
 
-            dbUser = self.bot.db["users"].find_one({"id": str(user.id)})
+            dbUser = await self.bot.db.users.find_one({"id": str(user.id)})
 
             if dbUser:
                 embed = discord.Embed(colour=await embedColour())
@@ -81,10 +81,10 @@ class UtilityCog(commands.Cog):
             if bot == None:
                 return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an ID of a bot.")
 
-            dbBot = self.bot.db["bots"].find_one({"id": str(bot.id)})
+            dbBot = await self.bot.db.bots.find_one({"id": str(bot.id)})
 
             if dbBot:
-                botOwner = self.bot.db["users"].find_one({"id": dbBot["owner"]["id"]})
+                botOwner = await self.bot.db.users.find_one({"id": dbBot["owner"]["id"]})
 
                 embed = discord.Embed(colour=await embedColour())
 
@@ -120,7 +120,7 @@ class UtilityCog(commands.Cog):
             if bot == None:
                 return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an ID of a bot.")
 
-            dbBot = self.bot.db["bots"].find_one({"id": str(bot.id)})
+            dbBot = await self.bot.db.bots.find_one({"id": str(bot.id)})
 
             if dbBot:
                 if dbBot["owner"]["id"] == str(ctx.author.id):
@@ -137,6 +137,25 @@ class UtilityCog(commands.Cog):
                     await ctx.send(f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the owner of the specified bot to access it's token.")
             else:
                 return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid bot:** I could not find the bot you specified in my database.")
+
+    @commands.command(name="cssreset", aliases=["resetcss"], usage="cssreset", help="Allows you to reset your custom css if you've broken something.", hidden=False)
+    async def css_reset(self, ctx):
+        async with ctx.channel.typing():
+            dbUser = await self.bot.db.users.find_one({"id": str(ctx.author.id)})
+
+            if dbUser:
+                await self.bot.db.users.update_one({"id": str(ctx.author.id)}, { 
+                    "$set": { 
+                        "profile.css": ""
+                    } 
+                })
+
+                return await ctx.send(f"{self.bot.settings['formats']['success']} **Success:** Your custom css was reset.")
+            else:
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Unknown account:** You need to have authenticated on our website before to use this command.")
+                    
+
+    
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))
