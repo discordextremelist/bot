@@ -14,7 +14,7 @@ dnspython==1.16.0
 docopt==0.6.2
 furl==2.1.0
 humanfriendly==4.7
-humanize==2.2.0
+humanize==2.4.0
 hyperlink==19.0.0
 idna==2.9
 idna-ssl==1.1.0
