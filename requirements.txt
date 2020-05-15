@@ -4,7 +4,7 @@ attrs==19.3.0
 Automat==20.2.0
 braceexpand==0.1.5
 buildtools==1.0.6
-certifi==2019.11.28
+certifi==2020.4.5.1
 chardet==3.0.4
 colorama==0.4.3
 colouredlogs==10.0.1
