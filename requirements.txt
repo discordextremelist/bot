@@ -20,7 +20,7 @@ idna==2.9
 idna-ssl==1.1.0
 import-expression==1.0.0
 incremental==17.5.0
-Jinja2==2.11.1
+Jinja2==2.11.2
 jishaku==1.18.2.188
 MarkupSafe==1.1.1
 motor==2.1.0
