@@ -98,7 +98,7 @@ async def on_user_update(before, after):
                 }
             })
     else:
-        user = db["users"].find_one({"id": str(member.id)})
+        user = db["users"].find_one({"id": str(before.id)})
         
         if user:
             db["users"].update_one({"id": str(before.id)}, {
