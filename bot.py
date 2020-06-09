@@ -51,6 +51,7 @@ async def get_prefix(bot, message):
         prefixes = settings["prefix"]
         return commands.when_mentioned_or(*prefixes)(bot, message)
 
+
 if settings["ownership"]["multiple"]:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"])
 else:
@@ -85,10 +86,10 @@ async def on_guild_join(guild):
 @bot.event
 async def on_user_update(before, after):
     if before.bot:
-        bot = db["bots"].find_one({"id": str(member.id)})
-        
-        if bot:
-            db["bots"].update_one({"id": str(before.id)}, {
+        db_bot = db["bots"].find_one({"_id": str(before.id)})
+
+        if db_bot:
+            db["bots"].update_one({"_id": str(before.id)}, {
                 "$set": {
                     "name": after.name,
                     "avatar": {
@@ -98,10 +99,10 @@ async def on_user_update(before, after):
                 }
             })
     else:
-        user = db["users"].find_one({"id": str(before.id)})
-        
+        user = db["users"].find_one({"_id": str(before.id)})
+
         if user:
-            db["users"].update_one({"id": str(before.id)}, {
+            db["users"].update_one({"_id": str(before.id)}, {
                 "$set": {
                     "name": after.name,
                     "discrim": after.discriminator,
@@ -117,42 +118,44 @@ async def on_user_update(before, after):
 @bot.event
 async def on_member_join(member):
     if member.bot:
-        bot = db["bots"].find_one({"id": str(member.id)})
+        db_bot = db["bots"].find_one({"_id": str(member.id)})
 
         if str(member.guild.id) == settings["guilds"]["main"]:
-            if bot:
-                if bot["status"]["verified"]:
-                    await member.add_roles(discord.Object(id=int(settings["roles"]["verifiedBot"])), reason="Bot is Verified on the website.")
+            if db_bot:
+                if db_bot["status"]["verified"]:
+                    await member.add_roles(discord.Object(id=int(settings["roles"]["verifiedBot"])),
+                                           reason="Bot is Verified on the website.")
                 else:
-                    await member.add_roles(discord.Object(id=int(settings["roles"]["bot"])), reason="Bot is Approved on the website.")
+                    await member.add_roles(discord.Object(id=int(settings["roles"]["bot"])),
+                                           reason="Bot is Approved on the website.")
             else:
-                await member.add_roles(discord.Object(id=int(settings["roles"]["unlisted"])), reason="Bot is not listed on the website.")
+                await member.add_roles(discord.Object(id=int(settings["roles"]["unlisted"])),
+                                       reason="Bot is not listed on the website.")
         else:
-            if bot:
-                if bot["status"]["approved"]:
-                    await member.add_roles(discord.Object(id=int(settings["roles"]["unapprovedBot"])), reason="Bot is not approved on the website.")
+            if db_bot:
+                if db_bot["status"]["approved"]:
+                    await member.add_roles(discord.Object(id=int(settings["roles"]["unapprovedBot"])),
+                                           reason="Bot is not approved on the website.")
 
     elif str(member.guild.id) == settings["guilds"]["main"]:
-        user = db["users"].find_one({"id": str(member.id)})
 
-        if user["rank"]["verified"]:
-            await member.add_roles(discord.Object(id=int(settings["roles"]["verifiedDeveloper"])), reason="User is a Verified Developer on the website.")
-            await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])), reason="User is a Verified Developer on the website.")
-        else:
-            bots = db["bots"].find({"owner": {"id": str(member.id)}})
-            botCount = 0
+        bots = db["bots"].find({"owner": {"_id": str(member.id)}})
+        bot_count = 0
 
-            for bot in bots:
-                if bot["status"]["approved"]:
-                    botCount += 1
+        for discord_bot in bots:
+            if discord_bot["status"]["approved"]:
+                bot_count += 1
 
-            if botCount >= 1:
-                await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])), reason="User is a Verified Developer on the website.")
+        if bot_count >= 1:
+            await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])),
+                                   reason="User is a Developer on the website.")
+
 
 @bot.event
 async def on_command_error(ctx, error):
     if error in (discord.Forbidden, commands.BotMissingPermissions, commands.CommandNotFound, commands.CheckFailure):
         pass
+
 
 @bot.event
 async def on_message(msg):
@@ -166,5 +169,6 @@ async def on_message_edit(old_msg, new_msg):
     if not old_msg.author.bot and new_msg.content is not old_msg.content:
         ctx = await bot.get_context(new_msg, cls=EditingContext)
         await bot.invoke(ctx)
+
 
 bot.run(settings["token"], bot=True, reconnect=True)
