@@ -21,11 +21,9 @@ import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 import json
 
-from colorama import Fore, init
 from discord.ext import commands, tasks
 from ext.context import EditingContext
 
-init()
 colouredlogs.install()
 
 with open("settings.json") as content:
@@ -33,7 +31,6 @@ with open("settings.json") as content:
 
 logging.basicConfig(level=logging.INFO)
 
-fr = Fore.RESET
 logging.info("Starting bot")
 db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
 botExtensions = [
