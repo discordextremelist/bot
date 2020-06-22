@@ -18,68 +18,103 @@
 import discord
 from discord.ext import commands
 
+from ext.checks import mod_check, NoSomething
+
 
 class WebModeration(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="approve", aliases=["approvebot"], usage="approve <@mention/#id>",
-                      help="Allows you to approve the bot on the website.", hidden=False)
-    async def approve_bot(self, ctx, *, bot: discord.User = None):
+    @commands.command(name="approve", aliases=["approvebot"])
+    @mod_check()
+    async def approve_bot(self, ctx, bot: discord.User):
+        """
+        Allows you to approve the bot on the website.
+        """
         async with ctx.channel.typing():
             db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
 
-            if db_user is None:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Permission error:** You need to be a Website Moderator "
-                    f"to use this command.")
-            elif not db_user["rank"]["mod"]:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Permission error:** You need to be a Website Moderator "
-                    f"to use this command.")
-
-            if bot is None:
+            if bot is None or not bot.bot:
                 return await ctx.send(
                     f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an "
                     f"ID of a bot.")
 
             db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+            if not db_bot:
+                raise NoSomething(bot)
 
-            if db_bot:
-                if db_bot["status"]["approved"]:
-                    return await ctx.send(
-                        f"{self.bot.settings['formats']['error']} **Already approved:** You cannot approve a bot that "
-                        f"is already approved!")
-                else:
-                    await self.bot.db.bots.update_one({"_id": str(bot.id)}, {
-                        "$set": {
-                            "status.approved": True
-                        }
-                    })
-
-                    db_user.staffTracking.handledBots.allTime.total += 1
-                    db_user.staffTracking.handledBots.allTime.approved += 1
-                    db_user.staffTracking.handledBots.thisWeek.total += 1
-                    db_user.staffTracking.handledBots.thisWeek.approved += 1
-
-                    await self.bot.db.users.update_one({"_id": str(ctx.author.id)}, {
-                        "$set": {
-                            "staffTracking.handledBots.allTime.total": db_user.staffTracking.handledBots.allTime.total,
-                            "staffTracking.handledBots.allTime.approved": db_user.staffTracking.handledBots.allTime.approved,
-                            "staffTracking.handledBots.thisWeek.total": db_user.staffTracking.handledBots.thisWeek.total,
-                            "staffTracking.handledBots.thisWeek.approved": db_user.staffTracking.handledBots.thisWeek.approved
-                        }
-                    })
-
-                    return await ctx.send(
-                        f"{self.bot.settings['formats']['error']} **Success:** {db_bot.name} has been approved "
-                        f"successfully!")
-
-            else:
+            if db_bot["status"]["approved"]:
                 return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid bot:** I could not find the bot you specified "
-                    f"in my database.")
+                    f"{self.bot.settings['formats']['error']} **Already approved:** You cannot approve a bot that "
+                    f"is already approved!")
+
+            await self.bot.db.bots.update_one({"_id": str(bot.id)}, {
+                "$set": {
+                    "status.approved": True
+                }
+            })
+
+            await self.bot.db.users.update_one({"_id": str(ctx.author.id)}, {
+                "$set": {
+                    "staffTracking.handledBots.allTime.total": db_user.staffTracking.handledBots.allTime.total+1,
+                    "staffTracking.handledBots.allTime.approved": db_user.staffTracking.handledBots.allTime.approved+1,
+                    "staffTracking.handledBots.thisWeek.total": db_user.staffTracking.handledBots.thisWeek.total+1,
+                    "staffTracking.handledBots.thisWeek.approved": db_user.staffTracking.handledBots.thisWeek.approved+1
+                }
+            })
+
+            await ctx.send(
+                f"{self.bot.settings['formats']['error']} **Success:** {db_bot.name} has been approved "
+                f"successfully!")
+
+            site = ctx.bot.settings['website']['url']
+            await ctx.bot.get_channel(603800402013585408).send(
+                f"<:check:587490138129563649> {ctx.author} ({ctx.author.id}) approved bot {bot} ({bot.id})\n{site}/bots/{bot.id}")
+
+    @commands.command(name="deny", aliases=["denybot"])
+    @mod_check()
+    async def approve_bot(self, ctx, bot: discord.User, *, reason):
+        """
+        Allows you to decline a bot on the website.
+        """
+        async with ctx.channel.typing():
+            db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+
+            if bot is None or not bot.bot:
+                return await ctx.send(
+                    f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an "
+                    f"ID of a bot.")
+
+            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+            if not db_bot:
+                raise NoSomething(bot)
+
+            if db_bot["status"]["approved"]:
+                return await ctx.send(
+                    f"{self.bot.settings['formats']['error']} **Already approved:** You cannot decline a bot that "
+                    f"is already approved!")
+
+            await self.bot.db.bots.update_one({"_id": str(bot.id)}, {
+                "$set": {
+                    "status.approved": True
+                }
+            })
+
+            await self.bot.db.users.update_one({"_id": str(ctx.author.id)}, {
+                "$set": {
+                    "staffTracking.handledBots.allTime.total": db_user.staffTracking.handledBots.allTime.total + 1,
+                    "staffTracking.handledBots.allTime.declined": db_user.staffTracking.handledBots.allTime.declined + 1,
+                    "staffTracking.handledBots.thisWeek.total": db_user.staffTracking.handledBots.thisWeek.total + 1,
+                    "staffTracking.handledBots.thisWeek.declined": db_user.staffTracking.handledBots.thisWeek.declined + 1
+                }
+            })
+
+            await ctx.send(
+                f"{self.bot.settings['formats']['error']} **Success:** {db_bot.name} has been declined "
+                f"successfully!")
+            await ctx.bot.get_channel(603800402013585408).send(f"<:cross:587490138129432596> {ctx.author} ({ctx.author.id}) declined bot {bot} ({bot.id})\n[ Reason ] `{reason}`")
+
 
 
 def setup(bot):

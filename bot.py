@@ -15,13 +15,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import colouredlogs, logging
 import datetime
-import discord
-from motor.motor_asyncio import AsyncIOMotorClient
 import json
+import logging
 
-from discord.ext import commands, tasks
+import colouredlogs
+import discord
+from discord.ext import commands
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from ext.checks import NoMod, NoSomething
 from ext.context import EditingContext
 
 colouredlogs.install()
@@ -30,9 +33,10 @@ with open("settings.json") as content:
     settings = json.load(content)
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("discord").setLevel(logging.WARNING)
 
 logging.info("Starting bot")
-db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
+db = AsyncIOMotorClient(settings["mongo"])
 botExtensions = [
     "cogs.help",
     "cogs.utility",
@@ -54,7 +58,6 @@ if settings["ownership"]["multiple"]:
 else:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"])
 
-bot.remove_command("help")
 bot.db = db
 bot.settings = settings
 bot.cmd_edits = {}
@@ -65,7 +68,7 @@ if __name__ == "__main__":
             bot.load_extension(ext)
             logging.info(f"{ext} has been loaded")
         except Exception as err:
-            logging.error(f"An error occurred whilst loading {ext}: {err}")
+            logging.exception(f"An error occurred whilst loading {ext}", exc_info=err)
 
 
 @bot.event
@@ -81,32 +84,32 @@ async def on_guild_join(guild):
 
 
 @bot.event
-async def on_user_update(before, after):
-    if before.bot:
-        db_bot = db["bots"].find_one({"_id": str(before.id)})
+async def on_user_update(_, after):
+    if after.bot:
+        db_bot = db["bots"].find_one({"_id": str(after.id)})
 
         if db_bot:
-            db["bots"].update_one({"_id": str(before.id)}, {
+            db["bots"].update_one({"_id": str(after.id)}, {
                 "$set": {
                     "name": after.name,
                     "avatar": {
                         "hash": after.avatar,
-                        "url": f"https://cdn.discordapp.com/avatars/{before.id}/{after.avatar}"
+                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}" # ffs stay consistent
                     }
                 }
             })
     else:
-        user = db["users"].find_one({"_id": str(before.id)})
+        user = db["users"].find_one({"_id": str(after.id)})
 
         if user:
-            db["users"].update_one({"_id": str(before.id)}, {
+            db["users"].update_one({"_id": str(after.id)}, {
                 "$set": {
                     "name": after.name,
                     "discrim": after.discriminator,
                     "fullUsername": f"{after.name}#{after.discriminator}",
                     "avatar": {
                         "hash": after.avatar,
-                        "url": f"https://cdn.discordapp.com/avatars/{before.id}/{after.avatar}"
+                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}" # ffs
                     }
                 }
             })
@@ -115,7 +118,7 @@ async def on_user_update(before, after):
 @bot.event
 async def on_member_join(member):
     if member.bot:
-        db_bot = db["bots"].find_one({"_id": str(member.id)})
+        db_bot = await db["bots"].find_one({"_id": str(member.id)})
 
         if str(member.guild.id) == settings["guilds"]["main"]:
             if db_bot:
@@ -136,22 +139,33 @@ async def on_member_join(member):
 
     elif str(member.guild.id) == settings["guilds"]["main"]:
 
-        bots = db["bots"].find({"owner": {"_id": str(member.id)}})
-        bot_count = 0
+        bots = await db["bots"].find({"owner": {"_id": str(member.id)}})
 
         for discord_bot in bots:
             if discord_bot["status"]["approved"]:
-                bot_count += 1
-
-        if bot_count >= 1:
-            await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])),
-                                   reason="User is a Developer on the website.")
-
+                await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])),
+                                       reason="User is a Developer on the website.")
+                break
 
 @bot.event
 async def on_command_error(ctx, error):
-    if error in (discord.Forbidden, commands.BotMissingPermissions, commands.CommandNotFound, commands.CheckFailure):
-        pass
+    if isinstance(error, (discord.Forbidden, commands.CommandNotFound)):
+        return
+
+    if isinstance(error, NoMod):
+        return await ctx.send("Looks like you ain't a moderator kiddo")
+
+    if isinstance(error, NoSomething):
+        return await ctx.send(error.message)
+
+    if isinstance(error, commands.CheckFailure) and error.args:
+        return await ctx.send(error.args[0])
+
+    if isinstance(error, commands.CommandError) and error.args:
+        return await ctx.send(error.args[0])
+
+    logging.exception("something done fucked up", exc_info=error)
+    await ctx.send("something fucked up")
 
 
 @bot.event
@@ -163,7 +177,7 @@ async def on_message(msg):
 
 @bot.event
 async def on_message_edit(old_msg, new_msg):
-    if not old_msg.author.bot and new_msg.content is not old_msg.content:
+    if not old_msg.author.bot and new_msg.content != old_msg.content:
         ctx = await bot.get_context(new_msg, cls=EditingContext)
         await bot.invoke(ctx)
 

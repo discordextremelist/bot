@@ -19,6 +19,8 @@ from time import monotonic
 import discord
 from discord.ext import commands
 
+from ext.checks import *
+
 
 class UtilityCog(commands.Cog):
 
@@ -36,118 +38,114 @@ class UtilityCog(commands.Cog):
 
         return colour
 
-    @commands.command(name="ping", aliases=["latency", "pingpong", "pong"], usage="ping",
-                      help="Allows you to get the bot's current ping.", hidden=False)
+    @commands.command(name="ping", aliases=["latency", "pingpong", "pong"], usage="ping")
     async def ping(self, ctx):
-        async with ctx.channel.typing():
-            before = monotonic()
-            msg = await ctx.send(f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is :thinking:**")
-            ping = (monotonic() - before) * 1000
-            await msg.edit(content=f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is:** `{int(ping)}ms`")
+        """
+        Allows you to get the bot's current ping.
+        """
+        before = monotonic()
+        await ctx.trigger_typing()
+        ping = (monotonic() - before) * 1000
+        await ctx.send(f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is:** `{int(ping)}ms`")
 
-    @commands.command(name="userinfo", aliases=["ui", "profile"], usage="userinfo [@mention/#id]",
-                      help="Allows you to get your own or another user's DEL profile information.", hidden=False)
+    @commands.command(name="userinfo", aliases=["ui", "profile"])
     async def user_info(self, ctx, *, user: discord.User = None):
+        """
+        Allows you to get your own or another user's DEL profile information.
+        """
         async with ctx.channel.typing():
-
             if user is None:
-                userID = ctx.author.id
-            else:
-                userID = user.id
+                user = ctx.author
 
-            db_user = await self.bot.db.users.find_one({"_id": str(userID)})
+            db_user = await self.bot.db.users.find_one({"_id": str(user.id)})
+            if not db_user:
+                raise NoSomething(user)
 
-            if db_user:
-                embed = discord.Embed(colour=await self.embed_colour(ctx))
+            embed = discord.Embed(colour=await self.embed_colour(ctx))
 
-                embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Username", value=db_user["fullUsername"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['url']} Profile URL",
-                                value=f"{self.bot.settings['website']['url']}/users/{db_user['_id']}", inline=False)
-                embed.set_thumbnail(url=f"{db_user['avatar']['url']}")
+            embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Username", value=db_user["fullUsername"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['url']} Profile URL",
+                            value=f"{self.bot.settings['website']['url']}/users/{db_user['_id']}", inline=False)
+            embed.set_thumbnail(url=f"{db_user['avatar']['url']}")
 
-                await ctx.send(embed=embed)
-            else:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid user:** I could not find the user you "
-                    f"specified in my database.")
+            await ctx.send(embed=embed)
 
-    @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <@mention/#id>",
-                      help="Allows you to get information of a bot.", hidden=False)
-    async def robot_info(self, ctx, *, bot: discord.User = None):
+
+    @commands.command(name="botinfo", aliases=["bi"])
+    async def robot_info(self, ctx, *, bot: discord.User):
+        """
+        Allows you to get information of a bot.
+        """
+        if not bot.bot:
+            return await ctx.send("That's no bot")
+
         async with ctx.channel.typing():
-
-            if bot is None:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an "
-                    f"ID of a bot.")
 
             db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
 
-            if db_bot:
-                bot_owner = await self.bot.db.users.find_one({"_id": db_bot["owner"]["id"]})
+            if not db_bot:
+                raise NoSomething(bot)
 
+            bot_owner = await self.bot.db.users.find_one({"_id": db_bot["owner"]["id"]})
+
+            embed = discord.Embed(colour=await self.embed_colour(ctx))
+
+            embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Bot Name", value=db_bot["name"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_bot["_id"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Developer",
+                            value=f"[{bot_owner['fullUsername']}]({self.bot.settings['website']['url']}/users/{bot_owner['_id']})")
+            embed.add_field(name=f"{self.bot.settings['emoji']['infoBook']} Library", value=db_bot["library"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Prefix", value=db_bot["prefix"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['shield']} Server Count",
+                            value=db_bot["serverCount"])
+            embed.add_field(name=f"{self.bot.settings['emoji']['url']} Listing URL",
+                            value=f"{self.bot.settings['website']['url']}/bots/{db_bot['_id']}", inline=False)
+            embed.set_thumbnail(url=f"{db_bot['avatar']['url']}")
+
+            await ctx.send(embed=embed)
+
+    @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"])
+    async def token(self, ctx, *, bot: discord.User):
+        """
+        Allows you to get the DELAPI token of the specified bot (provided you own it).
+        """
+        async with ctx.channel.typing():
+            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+
+            if not db_bot:
+                raise NoSomething(bot)
+
+            if db_bot["owner"]["id"] == str(ctx.author.id):
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
 
                 embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Bot Name", value=db_bot["name"])
                 embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_bot["_id"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Developer",
-                                value=f"[{bot_owner['fullUsername']}]({self.bot.settings['website']['url']}/users/{bot_owner['_id']})")
-                embed.add_field(name=f"{self.bot.settings['emoji']['infoBook']} Library", value=db_bot["library"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Prefix", value=db_bot["prefix"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['shield']} Server Count",
-                                value=db_bot["serverCount"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['url']} Listing URL",
-                                value=f"{self.bot.settings['website']['url']}/bots/{db_bot['_id']}", inline=False)
-                embed.set_thumbnail(url=f"{db_bot['avatar']['url']}")
+                embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{db_bot['token']}```",
+                                inline=False)
+                embed.set_thumbnail(url=f"{db_bot['avatar']['url']}.png")
 
-                await ctx.send(embed=embed)
-            else:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid bot:** I could not find the bot you specified "
-                    f"in my database.")
-
-    @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"], usage="token [@mention/#id]",
-                      help="Allows you to get the DELAPI token of the specified bot (provided you own it).",
-                      hidden=False)
-    async def token(self, ctx, *, bot: discord.User = None):
-        async with ctx.channel.typing():
-
-            if bot is None:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid argument:** You need to mention or provide an "
-                    f"ID of a bot.")
-
-            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
-
-            if db_bot:
-                if db_bot["owner"]["id"] == str(ctx.author.id):
-                    embed = discord.Embed(colour=await self.embed_colour(ctx))
-
-                    embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Bot Name", value=db_bot["name"])
-                    embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_bot["_id"])
-                    embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{db_bot['token']}```",
-                                    inline=False)
-                    embed.set_thumbnail(url=f"{db_bot['avatar']['url']}.png")
-
+                try:
                     await ctx.author.send(embed=embed)
-                    await ctx.send(
-                        f"{self.bot.settings['formats']['success']} **Success:** The specified bot's DELAPI token has "
-                        f"been sent to you via DM.")
-                else:
-                    await ctx.send(
-                        f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
-                        f"owner of the specified bot to access it's token.")
+                except:
+                    await ctx.send("Your dms appear to be closed")
+                await ctx.send(
+                    f"{self.bot.settings['formats']['success']} {bot}'s token has been dm'ed to you")
             else:
-                return await ctx.send(
-                    f"{self.bot.settings['formats']['error']} **Invalid bot:** I could not find the bot you specified "
-                    f"in my database.")
+                await ctx.send(
+                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
+                    f"owner of the specified bot to access it's token.")
 
-    @commands.command(name="cssreset", aliases=["resetcss"], usage="cssreset",
-                      help="Allows you to reset your custom css if you've broken something.", hidden=False)
+    @commands.command(name="cssreset", aliases=["resetcss", "ohshitohfuck"])
     async def css_reset(self, ctx):
+        """
+        Allows you to reset your custom css if you've broken something
+        """
         async with ctx.channel.typing():
             db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+
+            if not db_user:
+                raise NoSomething(ctx.author)
 
             if db_user:
                 await self.bot.db.users.update_one({"_id": str(ctx.author.id)}, {
