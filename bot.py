@@ -36,7 +36,7 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("discord").setLevel(logging.WARNING)
 
 logging.info("Starting bot")
-db = AsyncIOMotorClient(settings["mongo"])
+db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
 botExtensions = [
     "cogs.help",
     "cogs.utility",
