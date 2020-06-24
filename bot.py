@@ -59,6 +59,7 @@ else:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"])
 
 bot.db = db
+bot.remove_command("help") # Until other help thing is working properly - do this in a future release
 bot.settings = settings
 bot.cmd_edits = {}
 
