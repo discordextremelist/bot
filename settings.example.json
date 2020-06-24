@@ -1,7 +1,10 @@
 {
   "token": "",
   "prefix": ["del,"],
-  "mongo": "mongodb://localhost:27017",
+  "mongo": {
+    "uri": "mongodb://localhost:27017",
+    "db": "del"
+  },
   "ownership": {
     "multiple": true,
     "owners": [0],
