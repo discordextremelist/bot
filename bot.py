@@ -122,9 +122,9 @@ async def on_member_join(member):
 
         if str(member.guild.id) == settings["guilds"]["main"]:
             if db_bot:
-                if db_bot["status"]["verified"]:
-                    await member.add_roles(discord.Object(id=int(settings["roles"]["verifiedBot"])),
-                                           reason="Bot is Verified on the website.")
+                if db_bot["status"]["premium"]:
+                    await member.add_roles(discord.Object(id=int(settings["roles"]["premiumBot"])),
+                                           reason="Bot is Premium on the website.")
                 else:
                     await member.add_roles(discord.Object(id=int(settings["roles"]["bot"])),
                                            reason="Bot is Approved on the website.")
