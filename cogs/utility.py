@@ -49,7 +49,7 @@ class UtilityCog(commands.Cog):
         ping = (monotonic() - before) * 1000
         await ctx.send(f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is:** `{int(ping)}ms`")
 
-    @commands.command(name="userinfo", aliases=["ui", "profile"])
+    @commands.command(name="userinfo", aliases=["ui", "profile"], usage="userinfo <user>")
     async def user_info(self, ctx, *, user: discord.User = None):
         """
         Allows you to get your own or another user's DEL profile information.
@@ -73,7 +73,7 @@ class UtilityCog(commands.Cog):
             await ctx.send(embed=embed)
 
 
-    @commands.command(name="botinfo", aliases=["bi"])
+    @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <bot>")
     async def robot_info(self, ctx, *, bot: discord.User):
         """
         Allows you to get information of a bot.
@@ -106,7 +106,7 @@ class UtilityCog(commands.Cog):
 
             await ctx.send(embed=embed)
                                 
-    @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"])
+    @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"], usage="token <bot>")
     async def token(self, ctx, *, bot: discord.User):
         """
         Allows you to get the DELAPI token of the specified bot (provided you own it).
@@ -137,7 +137,7 @@ class UtilityCog(commands.Cog):
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
                     f"owner of the specified bot to access it's token.")
 
-    @commands.command(name="admintoken")
+    @commands.command(name="admintoken", usage="admintoken")
     async def admin_token(self, ctx):
         """
         Allows you to get your temporary DELADMIN access token (admins only).
@@ -147,7 +147,7 @@ class UtilityCog(commands.Cog):
 
             if not db_user:
                 raise NoSomething(user)
-            elif db_user["rank"]["admin"] == true:
+            elif db_user["rank"]["admin"] == false:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
                     f"DEL admin to obtain one of these.")             
