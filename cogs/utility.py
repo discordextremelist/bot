@@ -128,10 +128,10 @@ class UtilityCog(commands.Cog):
 
                 try:
                     await ctx.author.send(embed=embed)
+                    await ctx.send(
+                        f"{self.bot.settings['formats']['success']} {bot}'s token has been dm'ed to you")
                 except:
                     await ctx.send("Your dms appear to be closed")
-                await ctx.send(
-                    f"{self.bot.settings['formats']['success']} {bot}'s token has been dm'ed to you")
             else:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
