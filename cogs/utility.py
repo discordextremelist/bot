@@ -72,7 +72,6 @@ class UtilityCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
-
     @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <bot>")
     async def robot_info(self, ctx, *, bot: discord.User):
         """
@@ -105,7 +104,7 @@ class UtilityCog(commands.Cog):
             embed.set_thumbnail(url=f"{db_bot['avatar']['url']}")
 
             await ctx.send(embed=embed)
-                                
+
     @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"], usage="token <bot>")
     async def token(self, ctx, *, bot: discord.User):
         """
@@ -146,19 +145,22 @@ class UtilityCog(commands.Cog):
             db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
 
             if not db_user:
-                raise NoSomething(user)
-            elif db_user["rank"]["admin"] == false:
+                raise NoSomething(ctx.author)
+            elif db_user["rank"]["admin"] == False:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
-                    f"DEL admin to obtain one of these.")             
-                           
+                    f"DEL admin to obtain one of these.")
+
             token = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
 
             if token:
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
 
-                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time", value=datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
-                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From", value=datetime.utcfromtimestamp(token.lastUpdate).strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time",
+                                value=datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From",
+                                value=datetime.datetime.utcfromtimestamp(token.lastUpdate).strftime(
+                                    f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
                                 inline=False)
                 embed.set_thumbnail(url=ctx.author.avatar_url)
@@ -172,8 +174,7 @@ class UtilityCog(commands.Cog):
             else:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
-                    f"DEL admin to obtain one of these.")    
-                
+                    f"DEL admin to obtain one of these.")
 
     @commands.command(name="cssreset", aliases=["resetcss", "ohshitohfuck"])
     async def css_reset(self, ctx):
