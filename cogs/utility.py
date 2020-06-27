@@ -164,9 +164,9 @@ class UtilityCog(commands.Cog):
                 embed.set_thumbnail(url=ctx.author.avatar_url)
 
                 try:
-                    await ctx.author.send(embed=embed)
                     await ctx.send(
                         f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
+                    await ctx.author.send(embed=embed)
                 except:
                     await ctx.send("Your dms appear to be closed")
             else:
