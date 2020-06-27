@@ -63,6 +63,9 @@ bot.remove_command("help") # Until other help thing is working properly - do thi
 bot.settings = settings
 bot.cmd_edits = {}
 
+game = discord.Game(name="discordextremelist.xyz", type=discord.ActivityType.watching)
+await bot.change_presence(status=discord.Status.online, activity=game)
+
 if __name__ == "__main__":
     for ext in botExtensions:
         try:
@@ -70,7 +73,6 @@ if __name__ == "__main__":
             logging.info(f"{ext} has been loaded")
         except Exception as err:
             logging.exception(f"An error occurred whilst loading {ext}", exc_info=err)
-
 
 @bot.event
 async def on_ready():
