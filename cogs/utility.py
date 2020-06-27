@@ -147,7 +147,7 @@ class UtilityCog(commands.Cog):
 
             if not db_user:
                 raise NoSomething(user)
-            elif db_user.rank.admin == true:
+            elif db_user["rank"]["admin"]de == true:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
                     f"DEL admin to obtain one of these.")             
@@ -165,10 +165,10 @@ class UtilityCog(commands.Cog):
 
                 try:
                     await ctx.author.send(embed=embed)
+                    await ctx.send(
+                        f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
                 except:
                     await ctx.send("Your dms appear to be closed")
-                await ctx.send(
-                    f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
             else:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
