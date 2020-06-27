@@ -63,9 +63,6 @@ bot.remove_command("help") # Until other help thing is working properly - do thi
 bot.settings = settings
 bot.cmd_edits = {}
 
-game = discord.Game(name="discordextremelist.xyz", type=discord.ActivityType.watching)
-await bot.change_presence(status=discord.Status.online, activity=game)
-
 if __name__ == "__main__":
     for ext in botExtensions:
         try:
@@ -77,6 +74,8 @@ if __name__ == "__main__":
 @bot.event
 async def on_ready():
     logging.info(f"Connection established! - Logged in as {bot.user} ({bot.user.id})")
+    game = discord.Game(name="discordextremelist.xyz", type=discord.ActivityType.watching)
+    await bot.change_presence(status=discord.Status.online, activity=game)
     if not hasattr(bot, "uptime"):
         bot.uptime = datetime.datetime.utcnow()
 
