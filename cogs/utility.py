@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from time import monotonic
+import datetime
 
 import discord
 from discord.ext import commands
@@ -105,36 +106,40 @@ class UtilityCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
-    @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"])
-    async def token(self, ctx, *, bot: discord.User):
+    @commands.command(name="admintoken")
+    async def token(self, ctx):
         """
-        Allows you to get the DELAPI token of the specified bot (provided you own it).
+        Allows you to get your temporary DELADMIN access token (admins only).
         """
         async with ctx.channel.typing():
-            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+            db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
 
-            if not db_bot:
-                raise NoSomething(bot)
+            if not db_user:
+                raise NoSomething(user)
+            elif db_user.rank.admin == true:
+                await ctx.send(
+                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
+                    f"DEL admin to obtain one of these.")             
+                           
+            token = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
 
-            if db_bot["owner"]["id"] == str(ctx.author.id):
+            if token:
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
 
-                embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Bot Name", value=db_bot["name"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_bot["_id"])
-                embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{db_bot['token']}```",
+                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time", value=datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From", value=datetime.utcfromtimestamp(token.lastUpdate).strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
                                 inline=False)
-                embed.set_thumbnail(url=f"{db_bot['avatar']['url']}.png")
+                embed.set_thumbnail(url=ctx.author.avatar_url)
 
                 try:
                     await ctx.author.send(embed=embed)
                 except:
                     await ctx.send("Your dms appear to be closed")
                 await ctx.send(
-                    f"{self.bot.settings['formats']['success']} {bot}'s token has been dm'ed to you")
+                    f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
             else:
-                await ctx.send(
-                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
-                    f"owner of the specified bot to access it's token.")
+                
 
     @commands.command(name="cssreset", aliases=["resetcss", "ohshitohfuck"])
     async def css_reset(self, ctx):
