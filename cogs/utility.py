@@ -139,6 +139,9 @@ class UtilityCog(commands.Cog):
                 await ctx.send(
                     f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
             else:
+                await ctx.send(
+                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
+                    f"DEL admin to obtain one of these.")    
                 
 
     @commands.command(name="cssreset", aliases=["resetcss", "ohshitohfuck"])
