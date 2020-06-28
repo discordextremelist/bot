@@ -75,10 +75,10 @@ class HelpCog(commands.Cog):
 
                 if self.bot.settings["ownership"]["multiple"]:
                     if ctx.author.id in self.bot.settings["ownership"]["owners"]:
-                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} BotOwner Commands (1)", value="`jsk`", inline=False)
+                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (1)", value="`jsk`, `admintoken`", inline=False)
                 else:
                     if ctx.author.id == self.bot.settings["ownership"]["owner"]:
-                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} BotOwner Commands (1)", value="`jsk`", inline=False)
+                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (1)", value="`jsk`, `admintoken`", inline=False)
 
                 await ctx.send(embed=embed)
 
