@@ -156,7 +156,7 @@ class UtilityCog(commands.Cog):
                 embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time",
                                 value=datetime.datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From",
-                                value=datetime.datetime.utcfromtimestamp(token.lastUpdate).strftime(
+                                value=datetime.datetime.utcfromtimestamp(token["lastUpdate"]).strftime(
                                     f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
                                 inline=False)
