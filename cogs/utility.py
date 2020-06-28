@@ -135,8 +135,9 @@ class UtilityCog(commands.Cog):
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
                     f"owner of the specified bot to access it's token.")
-
+                      
     @commands.command(name="admintoken", usage="admintoken")
+    @commands.is_owner()
     async def admin_token(self, ctx):
         """
         Allows you to get your temporary DELADMIN access token (admins only).
@@ -146,10 +147,6 @@ class UtilityCog(commands.Cog):
 
             if not db_user:
                 raise NoSomething(ctx.author)
-            elif not db_user["rank"]["admin"]:
-                await ctx.send(
-                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
-                    f"DEL admin to obtain one of these.")
 
             token = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
 
