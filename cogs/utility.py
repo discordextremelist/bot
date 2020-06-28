@@ -135,7 +135,7 @@ class UtilityCog(commands.Cog):
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
                     f"owner of the specified bot to access it's token.")
-                      
+
     @commands.command(name="admintoken", usage="admintoken")
     @commands.is_owner()
     async def admin_token(self, ctx):
@@ -156,7 +156,7 @@ class UtilityCog(commands.Cog):
                 embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time",
                                 value=datetime.datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From",
-                                value=datetime.datetime.utcfromtimestamp(token["lastUpdate"]).strftime(
+                                value=datetime.datetime.utcfromtimestamp(token["lastUpdate"] / 1000).strftime(
                                     f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
                                 inline=False)
