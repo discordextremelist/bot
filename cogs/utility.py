@@ -146,7 +146,7 @@ class UtilityCog(commands.Cog):
 
             if not db_user:
                 raise NoSomething(ctx.author)
-            elif db_user["rank"]["admin"] == False:
+            elif not db_user["rank"]["admin"]:
                 await ctx.send(
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
                     f"DEL admin to obtain one of these.")
