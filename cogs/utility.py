@@ -154,7 +154,7 @@ class UtilityCog(commands.Cog):
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
 
                 embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time",
-                                value=datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                                value=datetime.datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From",
                                 value=datetime.datetime.utcfromtimestamp(token.lastUpdate).strftime(
                                     f"%I:%M%p - %a, %d %b %Y (GMT)"))
