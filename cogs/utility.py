@@ -153,10 +153,11 @@ class UtilityCog(commands.Cog):
             if token:
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
 
-                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Current Time",
-                                value=datetime.datetime.now().strftime(f"%I:%M%p - %a, %d %b %Y (GMT)"))
-                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid From",
+                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Valid From",
                                 value=datetime.datetime.utcfromtimestamp(token["lastUpdate"] / 1000).strftime(
+                                    f"%I:%M%p - %a, %d %b %Y (GMT)"))
+                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid Until",
+                                value=datetime.datetime.utcfromtimestamp(token["validUntil"] / 1000).strftime(
                                     f"%I:%M%p - %a, %d %b %Y (GMT)"))
                 embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
                                 inline=False)
