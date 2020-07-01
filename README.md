@@ -9,6 +9,7 @@ Licensing information viewable in LICENSE.md
 ### Python 3
 
 Python 3 is required for the DEL bot to function as it is built using python.
+**NOTE:** This has only been tested in Python 3.8 and may be broken on newer or older versions of Python 3.
 
 ### PM2 (Optional)
 
