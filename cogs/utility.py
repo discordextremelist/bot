@@ -73,12 +73,12 @@ class UtilityCog(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <bot>")
-    async def robot_info(self, ctx, *, bot: discord.User):
+    async def robot_info(self, ctx, *, bot: str):
         """
         Allows you to get information of a bot.
         """
-        if not bot.bot:
-            return await ctx.send("That's no bot")
+        if not bot.isdigit():
+            return await ctx.send("You provided wrong id.")
 
         async with ctx.channel.typing():
 
