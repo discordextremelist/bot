@@ -54,9 +54,9 @@ async def get_prefix(bot, message):
 
 
 if settings["ownership"]["multiple"]:
-    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"])
+    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"], allowed_mentions = discord.AllowedMentions(roles=False, users=False, everyone=False))
 else:
-    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"])
+    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"], allowed_mentions = discord.AllowedMentions(roles=False, users=False, everyone=False))
 
 bot.db = db
 bot.remove_command("help") # Until other help thing is working properly - do this in a future release
