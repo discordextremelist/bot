@@ -40,6 +40,7 @@ db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
 botExtensions = [
     "cogs.help",
     "cogs.utility",
+    "cogs.tickets",
     "jishaku"
 ]
 
@@ -120,7 +121,7 @@ async def on_user_update(_, after):
 @bot.event
 async def on_member_join(member):
     if member.bot:
-        db_bot = await db["bots"].find_one({"_id": str(member.id)})
+        db_bot = await db.bots.find_one({"_id": str(member.id)})
 
         if str(member.guild.id) == settings["guilds"]["main"]:
             if db_bot:
@@ -141,7 +142,7 @@ async def on_member_join(member):
 
     elif str(member.guild.id) == settings["guilds"]["main"]:
 
-        bots = await db["bots"].find({"owner": {"_id": str(member.id)}})
+        bots = await db.bots.find({"owner": {"_id": str(member.id)}})
 
         for discord_bot in bots:
             if discord_bot["status"]["approved"]:
@@ -155,19 +156,19 @@ async def on_command_error(ctx, error):
         return
 
     if isinstance(error, NoMod):
-        return await ctx.send("Looks like you ain't a moderator kiddo")
+        return await ctx.channel.send("Looks like you ain't a moderator kiddo")
 
     if isinstance(error, NoSomething):
-        return await ctx.send(error.message)
+        return await ctx.channel.send(error.message)
 
     if isinstance(error, commands.CheckFailure) and error.args:
-        return await ctx.send(error.args[0])
+        return await ctx.channel.send(error)
 
     if isinstance(error, commands.CommandError) and error.args:
-        return await ctx.send(error.args[0])
+        return await ctx.channel.send(error.args[0])
 
     logging.exception("something done fucked up", exc_info=error)
-    await ctx.send("something fucked up")
+    await ctx.channel.send("something fucked up")
 
 
 @bot.event
