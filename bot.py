@@ -174,6 +174,7 @@ async def on_command_error(ctx, error):
 
     logging.exception("something done fucked up", exc_info=error)
 
+
 @bot.event
 async def on_message(msg):
     if not msg.author.bot:
@@ -193,8 +194,9 @@ async def on_message(msg):
                 message = await ctx.channel.fetch_message(int(ticket["ids"]["message"]))
 
                 embed = message.embeds[0]
-                embed.colour = 0xffec00
-                embed.title = f"Approval Feedback - {ticket['_id']} [DEV REPLIED]"
+                embed.colour = 0x0fb9fc
+                embed.set_author(name=f"Approval Feedback - {ticket['_id']} [DEV REPLIED]",
+                                 icon_url=ctx.bot.settings["images"]["dev_replied"])
 
                 await message.edit(embed=embed)
 
@@ -209,8 +211,9 @@ async def on_message(msg):
                     .fetch_message(int(ticket["ids"]["log"]))
 
                 embed2 = log_msg.embeds[0]
-                embed2.colour = 0xffec00
-                embed2.title = f"Approval Feedback - {ticket['_id']} [DEV REPLIED]"
+                embed2.colour = 0x0fb9fc
+                embed2.set_author(name=f"Approval Feedback - {ticket['_id']} [DEV REPLIED]",
+                                  icon_url=ctx.bot.settings["images"]["dev_replied"])
 
                 await log_msg.edit(embed=embed2)
 
@@ -219,8 +222,6 @@ async def on_message(msg):
                         "status": 3
                     }
                 })
-
-
 
 
 @bot.event

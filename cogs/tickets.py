@@ -29,9 +29,9 @@ class TicketCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.generator = snowflake.Generator()
-        self.closed = 0xff0000
-        self.awaiting_response = 0x00dd22
-        self.awaiting_fixes = 0xffa700
+        self.closed = 0xdd2e44
+        self.awaiting_response = 0x77ff77
+        self.awaiting_fixes = 0xf4dd1a
 
     async def snowflake_generate(self):
         while True:
@@ -75,9 +75,11 @@ class TicketCog(commands.Cog):
                                                          reason=f"Approval feedback channel - {ctx.author.id}")
 
             embed = discord.Embed(colour=self.awaiting_response,
-                                  title=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
                                               "the message(s) the staff member has sent below.")
+
+            embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
+                             icon_url=self.bot.settings["images"]["awaiting_response"])
 
             message = await channel.send(content=owner.mention, embed=embed,
                                          allowed_mentions=discord.AllowedMentions(users=True))
@@ -86,8 +88,11 @@ class TicketCog(commands.Cog):
             await ctx.send(f"{self.bot.settings['formats']['success']} **Ticket created:** Successfully created "
                            f"ticket - <#{channel.id}>")
 
-            embed2 = discord.Embed(color=self.awaiting_response,
-                                   title=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]")
+            embed2 = discord.Embed(color=self.awaiting_response)
+
+            embed2.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
+                              icon_url=self.bot.settings["images"]["awaiting_response"])
+
             embed2.add_field(name="Channel", value=f"<#{channel.id}>")
 
             log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
@@ -122,7 +127,8 @@ class TicketCog(commands.Cog):
 
             embed = message.embeds[0]
             embed.colour = self.awaiting_fixes
-            embed.title = f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]"
+            embed.set_author(name=f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]",
+                             icon_url=self.bot.settings["images"]["awaiting_fixes"])
 
             await message.edit(embed=embed)
 
@@ -133,12 +139,13 @@ class TicketCog(commands.Cog):
                 "ids.message": str(message.id)
             })
 
-            log_msg = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))\
+            log_msg = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"])) \
                 .fetch_message(int(ticket["ids"]["log"]))
 
             embed2 = log_msg.embeds[0]
             embed2.colour = self.awaiting_fixes
-            embed2.title = f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]"
+            embed2.set_author(name=f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]",
+                              icon_url=self.bot.settings["images"]["awaiting_fixes"])
 
             await log_msg.edit(embed=embed2)
 
@@ -196,7 +203,8 @@ class TicketCog(commands.Cog):
                                                            f"{self.bot.settings['channels']['messageLog']}"
                                                            f"/{message_history.attachments[0].id}/{message_id['_id']})")
 
-            embed.title = f"Approval Feedback - {message_id['_id']} [CLOSED]"
+            embed.set_author(name=f"Approval Feedback - {message_id['_id']} [CLOSED]",
+                             icon_url=self.bot.settings["images"]["closed"])
 
             await log_message.edit(embed=embed)
             await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
