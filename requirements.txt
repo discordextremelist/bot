@@ -7,7 +7,7 @@ certifi==2020.6.20
 chardet==3.0.4
 colorama==0.4.3
 colouredlogs==10.0.1
-discord.py==1.4.0a2386+g2628949
+git+https://github.com/rapptz/discord.py
 dnspython==2.0.0
 humanfriendly==4.7
 humanize==2.5.0
