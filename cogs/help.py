@@ -73,12 +73,17 @@ class HelpCog(commands.Cog):
                     embed.add_field(name=f"{self.bot.settings['emoji']['home']} Help: Menu", value=f"All commands use the prefix `{'`, `'.join(self.bot.settings['prefix'])}` or `@{self.bot.user}`")
                     embed.add_field(name=f"{self.bot.settings['emoji']['toolbox']} Utility Commands (4)", value="`ping`, `userinfo`, `botinfo`, `token`", inline=False)
 
+                db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+                if db_user and db_user["rank"]["mod"]:
+                    embed.add_field(name=f"{self.bot.settings['emoji']['hammer']} Moderator Commands (3)",
+                                    value="`open-ticket`, `awaiting-fixes`, `close-ticket`", inline=False)
+
                 if self.bot.settings["ownership"]["multiple"]:
                     if ctx.author.id in self.bot.settings["ownership"]["owners"]:
-                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (1)", value="`jsk`, `admintoken`", inline=False)
+                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (2)", value="`jsk`, `admintoken`", inline=False)
                 else:
                     if ctx.author.id == self.bot.settings["ownership"]["owner"]:
-                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (1)", value="`jsk`, `admintoken`", inline=False)
+                        embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Admin Commands (2)", value="`jsk`, `admintoken`", inline=False)
 
                 await ctx.send(embed=embed)
 
