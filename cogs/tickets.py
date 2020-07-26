@@ -1,6 +1,26 @@
+# Discord Extreme List - Discord's unbiased list.
+
+# Copyright (C) 2020 Cairo Mitchell-Acason
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import discord
 from io import BytesIO
+
+import snowflake
 from discord.ext import commands
+
 from ext.checks import mod_check
 
 
@@ -8,253 +28,186 @@ class TicketCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.log_channel = 736545547112022036  # log channel id here
-        self.log_category = 736545513092153405  # category id under which the channel will be created
-        self.mod_role = 633141294633451540  # mod role id
-        self.txt_channel = 736569881494814730
-        self.unapproved = 0x1cc1e6
-        self.awaiting_fixes = 0xf73538
-        self.colour = 0x1cc1e6
-        self.closed_ticket_col = 0xe40707
+        self.generator = snowflake.Generator()
+        self.closed = 0xff0000
+        self.awaiting_response = 0x00dd22
+        self.awaiting_fixes = 0xffa700
 
-    def feedback_moderator():
-        async def predicate(ctx):
-            owner = await ctx.bot.db.statuses.find_one({"channel_id": str(ctx.channel.id)})
-            if owner['owner_id'] == str(ctx.author.id):
-                return True
-            elif owner['owner_id'] != str(ctx.author.id):
-                await ctx.send(f"You can't take over this approval feedback!")
-                return False
-            return False
+    async def snowflake_generate(self):
+        while True:
+            generated = self.generator.generate()
+            check_db = await self.bot.db.tickets.find_one({"_id": str(generated)})
 
-        return commands.check(predicate)
+            if not check_db:
+                return generated
 
-    async def ticket_opened(self, ctx, mod=None, channel=None, message=None, reason=None):
-        e = discord.Embed(color=self.colour, title=f"Approval ticket")
-        e.description = reason
-        e.set_footer(text=f"STATUS: Waiting for Response")
-        e.add_field(name=f"Channel:",
-                    value=f"{ctx.guild.get_channel(channel).mention}\n#{ctx.guild.get_channel(channel)}")
-        logchannel = ctx.guild.get_channel(self.log_channel)
-        logged_msg = await logchannel.send(embed=e)
-        await self.bot.db.statuses.insert_one(
-            {'channel_id': str(channel), 'message_id': str(message), 'owner_id': str(mod),
-             'log_msg_id': str(logged_msg.id),
-             'feedback_status': 0, 'closure_reason': None})
-
-    async def ticket_awaiting(self, ctx, message=None):
-        logmsg = await ctx.bot.db.statuses.find_one({"message_id": str(message)})
-        msg = await ctx.guild.get_channel(self.log_channel).fetch_message(logmsg)
-        embed = msg.embeds[0]
-        embed.color = self.awaiting_fixes
-        embed.set_footer(text="STATUS: Awaiting Fixes")
-        await msg.edit(embed=embed)
-        await ctx.bot.db.statuses.update_one({"channel_id": str(ctx.channel.id)}, {
-            "$set": {
-                'feedback_status': 1
-            }
-        })
-
-    async def ticket_closed(self, ctx, channel=None, reason=None, file=None):
-        logmsg = await self.bot.db.statuses.find_one({"channel_id": str(channel)})
-        msg = await ctx.guild.get_channel(self.log_channel).fetch_message(logmsg['log_msg_id'])
-        msg_history = await ctx.guild.get_channel(self.txt_channel).send(content=msg.jump_url, file=file)
-        embed = msg.embeds[0]
-        embed.color = self.closed_ticket_col
-        embed.add_field(name='Reason:', value=reason, inline=False)
-        embed.add_field(name='Moderator', value=f"{ctx.author} ({ctx.author.id})")
-        embed.add_field(name="Channel message history:", value=f"[Jump to file]({msg_history.jump_url})")
-        embed.set_footer(text="STATUS: Closed")
-        await msg.edit(embed=embed)
-        await ctx.bot.db.statuses.update_one({"channel_id": str(channel)}, {
-            "$set": {
-                'feedback_status': 2,
-                'closure_reason': reason
-            }
-        })
-
-    async def ownership_transfered(self, ctx, old_mod=None, new_mod=None):
-        await ctx.bot.db.statuses.update_one({"channel_id": str(ctx.channel.id)}, {
-            "$set": {
-                'owner_id': new_mod.id
-            }
-        })
-        msgid = await ctx.bot.db.statuses.find_one({'channel_id': str(ctx.channel.id)})
-        channel = ctx.guild.get_channel(self.log_channel)
-        msg = await channel.fetch_message(msgid['log_msg_id'])
-        e = discord.Embed(color=self.colour, title="Ownership transferred!")
-        e.description = f"**{old_mod}** has transfered {ctx.channel} ownership to **{new_mod}**.\n[Approval feedback " \
-                        f"status]({msg.jump_url}) "
-        await channel.send(embed=e)
-
-    @commands.command(name="open-ticket")
+    @commands.command(name="open-ticket", aliases=["new-ticket", "nt", "ot", "request-changes", "rc"])
     @commands.guild_only()
     @mod_check()
-    async def open_ticket(self, ctx, bot: discord.User, member: discord.Member, *, issues: str):
-
-        if len(issues) > 1900:
-            return await ctx.send(
-                f"Sorry, the issue is way too long! {len(issues)}/1900 chars, please open the ticket and write the "
-                f"issues yourself.")
+    async def open_ticket(self, ctx, bot: discord.User):
         if not bot.bot:
-            return await ctx.send(f"{bot} is not a bot!")
-        overwrites = {
-            ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            member: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-            ctx.author: discord.PermissionOverwrite(read_messages=True)
-        }
-        for channel in ctx.guild.channels:
-            if channel.name == f"{bot.name.lower()}-approval-feedback":
-                return await ctx.send(f"{channel.mention} is already created for that bot!")
-        try:
-            category = ctx.guild.get_channel(self.log_category)
-            channel = await ctx.guild.create_text_channel(name=f'{bot.name}-approval-feedback', overwrites=overwrites,
-                                                          category=category,
-                                                          reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] approval "
-                                                                 f"feedback channel")
-            e = discord.Embed(color=self.unapproved, title=f"Approval-feedback regarding your bot {bot}")
-            e.description = f"**Hello, {member.name}, while reviewing your bot we found few issues that should get " \
-                            f"fixed.\nHere are the issues we found:**\n {issues} "
-            e.set_footer(text='FEEDBACK STATUS: Waiting for Response')
-            msg = await channel.send(content=member.mention, embed=e,
-                                     allowed_mentions=discord.AllowedMentions(users=True))
-            await msg.pin()
-            await self.ticket_opened(ctx, channel=channel.id, message=msg.id, reason=issues, mod=ctx.author.id)
-            await ctx.send(f"{channel.mention} was created successfully and owner informed!", delete_after=20)
-        except Exception as e:
-            await ctx.send(f"Something failed! Error information: `{e}`")
+            return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid bot:** {bot} is not a bot.")
 
-    @commands.command(name='awaiting-fixes')
+        for channel in ctx.guild.channels:
+            if channel.name == bot.name.lower():
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Duplicated channel:** there is "
+                                      f"already a channel for this bot.")
+
+        try:
+            bot_db = await ctx.bot.db.bots.find_one({
+                "_id": str(bot.id)
+            })
+
+            ticket_id = await self.snowflake_generate()
+
+            category = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketCategory"]))
+
+            owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
+            mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
+
+            overwrites = {
+                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                owner: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                mods: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+            }
+
+            channel = await category.create_text_channel(name=bot.name.lower(), overwrites=overwrites,
+                                                         reason=f"Approval feedback channel - {ctx.author.id}")
+
+            embed = discord.Embed(colour=self.awaiting_response,
+                                  title=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
+                                  description="Hello, whilst reviewing your bot we found some issues, please refer to "
+                                              "the message(s) the staff member has sent below.")
+
+            message = await channel.send(content=owner.mention, embed=embed,
+                                         allowed_mentions=discord.AllowedMentions(users=True))
+
+            await message.pin()
+            await ctx.send(f"{self.bot.settings['formats']['success']} **Ticket created:** Successfully created "
+                           f"ticket - <#{channel.id}>")
+
+            embed2 = discord.Embed(color=self.awaiting_response,
+                                   title=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]")
+            embed2.add_field(name="Channel", value=f"<#{channel.id}>")
+
+            log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
+            log_msg = await log_channel.send(embed=embed2)
+
+            await self.bot.db.tickets.insert_one({
+                "_id": str(ticket_id),
+                "ids": {
+                    "channel": str(channel.id),
+                    "message": str(message.id),
+                    "log": str(log_msg.id),
+                    "bot": str(bot.id)
+                },
+                "status": 0,
+                "closureReason": None
+            })
+        except Exception as e:
+            return await ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```{e}```")
+
+    @commands.command(name="awaiting-fixes", aliases=["awaiting-changes", "af", "ac", "fixes", "changes"])
     @commands.guild_only()
     @mod_check()
-    @feedback_moderator()
     async def awaiting_fixes(self, ctx):
-        status_check = await ctx.bot.db.statuses.find_one({'channel_id': str(ctx.channel.id)})
         await ctx.message.delete()
 
-        if status_check and status_check['feedback_status'] == 0:
-            message = await ctx.channel.fetch_message(int(status_check['message_id']))
+        status_check = await self.bot.db.tickets.find_one({
+            "ids.channel": str(ctx.channel.id)
+        })
+
+        if status_check:
+            message = await ctx.channel.fetch_message(int(status_check["ids"]["message"]))
+
             embed = message.embeds[0]
-            embed.color = self.awaiting_fixes
-            embed.set_footer(text="FEEDBACK STATUS: Awaiting Fixes")
+            embed.colour = self.awaiting_fixes
+            embed.title = f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]"
+
             await message.edit(embed=embed)
-            msg = await ctx.send("Feedback marked as `Awaiting Fixes`")
-            await self.ticket_awaiting(ctx, message=message.id)
-        elif not status_check:
-            return await ctx.send("This doesn't look like a approval-feedback channel.", delete_after=20)
-        elif status_check and status_check == 1:
-            return await ctx.send("Feedback already marked as Awaiting Fixes.", delete_after=20)
+
+            await ctx.send(f"{self.bot.settings['formats']['ticketStatus']} **Ticket update:** Changed ticket "
+                           f"status to `Awaiting Fixes`.")
+
+            ticket = await self.bot.db.tickets.find_one({
+                "ids.message": str(message.id)
+            })
+
+            log_msg = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))\
+                .fetch_message(int(ticket["ids"]["log"]))
+
+            embed2 = log_msg.embeds[0]
+            embed2.colour = self.awaiting_fixes
+            embed2.title = f"Approval Feedback - {status_check['_id']} [AWAITING FIXES]"
+
+            await log_msg.edit(embed=embed2)
+
+            await ctx.bot.db.tickets.update_one({"ids.channel": str(ctx.channel.id)}, {
+                "$set": {
+                    "status": 1
+                }
+            })
+
+        elif status_check and status_check["status"] == 1:
+            return await ctx.send(f"{self.bot.settings['formats']['error']} **No changes:** This ticket is already set "
+                                  f"as `Awaiting Fixes`.", delete_after=5)
         else:
-            return
+            return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
+                                  f"ticket channel.")
 
-    @commands.command(name='close-ticket')
+    @commands.command(name="close-ticket", aliases=["ct", "close"])
     @commands.guild_only()
     @mod_check()
-    @feedback_moderator()
     async def close_ticket(self, ctx, *, reason: str):
-        messageid = await ctx.bot.db.statuses.find_one({"channel_id": str(ctx.channel.id)})
-        if len(reason) > 1000:
+        message_id = await self.bot.db.tickets.find_one({
+            "ids.channel": str(ctx.channel.id)
+        })
+
+        if len(reason) > 500:
             return await ctx.send(
-                f"Reason is too long... In fact, why do you need to make it longer than 1000 chars. ({len(reason)}/1000)",
-                delete_after=20)
-        if messageid:
-            logchannel = ctx.guild.get_channel(self.log_channel)
-            msgs = []
+                f"{self.bot.settings['formats']['error']} **Invalid length:** The reason you provided is too "
+                f"long. (`{len(reason) / 500}`)")
+
+        if message_id:
+            bot = ctx.guild.get_member(int(message_id["ids"]["bot"]))
+
+            messages = []
             for message in await ctx.channel.history().flatten():
-                msgs.append(f"[{message.created_at}] {message.author} - {message.content}\n")
-            msgs.reverse()
-            msgshis = "".join(msgs)
-            data = BytesIO(msgshis.encode('utf-8'))
-            file = discord.File(data, filename=f"{messageid['_id']}.txt")
-            await ctx.channel.delete(reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] {reason}")
-            await self.ticket_closed(ctx, channel=ctx.channel.id, reason=reason, file=file)
-        elif not messageid:
-            return await ctx.send(f"That doesn't look like a approval-feedback channel.", delete_after=20)
+                messages.append(f"[{message.created_at}] {message.author} - {message.content}\n")
 
-    @commands.command(name='transfer-ticket')
-    @commands.guild_only()
-    @mod_check()
-    @feedback_moderator()
-    async def transfer_ticket(self, ctx, moderator: discord.Member):
-        owner = await ctx.bot.db.statuses.find_one({"channel_id": str(ctx.channel.id)})
+            messages.reverse()
+            file = discord.File(BytesIO(("".join(messages)).encode("utf-8")), filename=f"{message_id['_id']}.txt")
 
-        role = ctx.guild.get_role(self.mod_role)
-        if role not in moderator.roles:
-            return await ctx.send("You cannot transfer the ownership to non-moderator.")
-        elif role in moderator.roles:
-            if owner['owner_id'] == moderator.id:
-                return await ctx.send(
-                    "Why the heck are you trying to transfer it to yourself? You're already an owner.")
-            elif owner['owner_id'] != moderator.id:
-                await self.ownership_transfered(ctx, old_mod=ctx.author, new_mod=moderator)
-                try:
-                    await moderator.send(f"{ctx.author} transfered {ctx.channel.mention} ownership to you!")
-                except:
-                    pass
-                await ctx.send(f"This approval feedback was successfully transfered to {moderator.mention}")
-                if ctx.channel.overwrites_for(moderator).send_messages == (False or None):
-                    await ctx.channel.set_permissions(moderator, read_messages=True, send_messages=True,
-                                                      read_message_history=True,
-                                                      reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] Feedback "
-                                                             f"ownership transfered")
-                    await ctx.channel.set_permissions(ctx.author, read_messages=False,
-                                                      reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] Feedback "
-                                                             f"ownership transfered")
-                else:
-                    return
+            await ctx.channel.delete(reason=f"Approval feedback closed - Author: {ctx.author.id}, Ticket ID: "
+                                            f"{message_id['_id']}")
 
-    @commands.command(name='add-moderator')
-    @commands.guild_only()
-    @mod_check()
-    @feedback_moderator()
-    async def add_moderator(self, ctx, moderator: discord.Member):
-        role = ctx.guild.get_role(self.mod_role)
-        if role not in moderator.roles:
-            return await ctx.send("You cannot add a non-moderator!")
-        elif role in moderator.roles:
-            if ctx.author.id == moderator.id:
-                return await ctx.send("Why the heck are you trying to add yourself, you're already added.")
-            elif ctx.author.id != moderator.id:
-                if ctx.channel.overwrites_for(moderator).send_messages == (False or None):
-                    await ctx.channel.set_permissions(moderator, read_messages=True, send_messages=True,
-                                                      read_message_history=True,
-                                                      reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] Added to "
-                                                             f"approval feedback")
-                    try:
-                        await moderator.send(f"{ctx.author} added you to {ctx.channel.mention} approval feedback!")
-                    except:
-                        pass
-                    await ctx.send(f"Added {moderator.mention} to this approval feedback")
-                else:
-                    await ctx.send(f"{moderator} is already added to this approval feedback")
+            log_message = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"])) \
+                .fetch_message(message_id["ids"]["log"])
 
-    @commands.command(name='remove-moderator')
-    @commands.guild_only()
-    @mod_check()
-    @feedback_moderator()
-    async def remove_moderator(self, ctx, moderator: discord.Member):
+            guild = self.bot.get_guild(int(self.bot.settings["guilds"]["messageLog"]))
 
-        role = ctx.guild.get_role(self.mod_role)
-        if role not in moderator.roles:
-            return await ctx.send("You cannot remove a non-moderator!")
-        elif role in moderator.roles:
-            if ctx.author.id == moderator.id:
-                return await ctx.send(
-                    "If you want to remove yourself, just transfer the ownership of this approval feedback to another "
-                    "moderator")
-            elif ctx.author.id != moderator.id:
-                if ctx.channel.overwrites_for(moderator).send_messages:
-                    await ctx.channel.set_permissions(moderator, read_messages=False, send_messages=False,
-                                                      read_message_history=False,
-                                                      reason=f"[ Mod: {ctx.author} ({ctx.author.id}) ] Removed from "
-                                                             f"approval feedback")
-                    await ctx.send(f"Removed {moderator.mention} from this approval feedback")
-                    try:
-                        await moderator.send(f"{ctx.author} removed you from {ctx.channel.mention} approval feedback!")
-                    except:
-                        pass
-                elif ctx.channel.overwrites_for(moderator).send_messages == (False or None):
-                    await ctx.send(f"{moderator} is not added to this approval feedback yet.")
+            message_history = await guild.get_channel(int(self.bot.settings["channels"]["messageLog"])) \
+                .send(content=log_message.jump_url, file=file)
+
+            embed = log_message.embeds[0]
+            embed.colour = self.closed
+            embed.remove_field(0)
+            embed.insert_field_at(0, name="Channel", value=f"[#{bot.name.lower()}](https://txt.discord.website/?txt="
+                                                           f"{self.bot.settings['channels']['messageLog']}"
+                                                           f"/{message_history.attachments[0].id}/{message_id['_id']})")
+
+            embed.title = f"Approval Feedback - {message_id['_id']} [CLOSED]"
+
+            await log_message.edit(embed=embed)
+            await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
+                "$set": {
+                    "status": 2,
+                    "closureReason": reason
+                }
+            })
+        else:
+            return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
+                                  f"ticket channel.")
 
 
 def setup(bot):

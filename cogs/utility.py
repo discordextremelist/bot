@@ -137,7 +137,6 @@ class UtilityCog(commands.Cog):
                     f"owner of the specified bot to access it's token.")
 
     @commands.command(name="admintoken", usage="admintoken")
-    @commands.is_owner()
     async def admin_token(self, ctx):
         """
         Allows you to get your temporary DELADMIN access token (admins only).

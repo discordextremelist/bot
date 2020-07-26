@@ -26,13 +26,30 @@
     "verifiedDeveloper": "",
     "staff": "",
     "mod": "",
-    "admin": ""
+    "admin": "",
+    "unlisted": ""
+  },
+  "colours": {
+    "awaiting_fixes": "0xf73538",
+    "awaiting_response": "0x1cc1e6",
+    "closed": "0xe40707"
+  },
+  "channels": {
+    "ticketCategory": "736545513092153405",
+    "ticketLog": "736545547112022036",
+    "messageLog": "736569881494814730"
+  },
+  "images": {
+    "awaiting_fixes": "",
+    "awaiting_response": "",
+    "closed": ""
   },
   "formats": {
     "error": "<:error:621988943314812928> |",
     "warn": "<:warning:599554018406039574> |",
     "success": "<:check:587490138129563649> |",
-    "noPerms": "<:cross:587490138129432596> |"
+    "noPerms": "<:cross:587490138129432596> |",
+    "ticketStatus": "<:flag:736795389210001497> |"
   },
   "emoji": {
     "check": "<:check:587490138129563649>",
