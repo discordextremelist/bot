@@ -1,19 +1,28 @@
 import discord
+import json
 from discord.ext import commands
+
+with open("settings.json") as content:
+    settings = json.load(content)
+
 
 class NoMod(commands.CheckFailure):
     pass
+
 
 class NoSomething(commands.CommandError):
     def __init__(self, account: discord.User):
         self.user = account
         if account.bot:
-            fmt = f"The bot {account} wasn't found in my database"
+            fmt = f"{self.bot.settings['formats']['error']} **Invalid bot:** I could not find {account} in my " \
+                  f"database."
         else:
-            fmt = f"The user {account} wasn't found in my database"
+            fmt = f"{self.bot.settings['formats']['error']} **Invalid user:** I could not find {account} in my " \
+                  f"database."
 
         self.message = fmt
         super().__init__(fmt)
+
 
 def mod_check():
     async def predicate(ctx):

@@ -40,6 +40,7 @@ db = AsyncIOMotorClient(settings["mongo"]["uri"])[settings["mongo"]["db"]]
 botExtensions = [
     "cogs.help",
     "cogs.utility",
+    "cogs.tickets",
     "jishaku"
 ]
 
@@ -54,12 +55,14 @@ async def get_prefix(bot, message):
 
 
 if settings["ownership"]["multiple"]:
-    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"], allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
+    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"],
+                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
 else:
-    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"], allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
+    bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"],
+                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
 
 bot.db = db
-bot.remove_command("help") # Until other help thing is working properly - do this in a future release
+bot.remove_command("help")
 bot.settings = settings
 bot.cmd_edits = {}
 
@@ -70,6 +73,7 @@ if __name__ == "__main__":
             logging.info(f"{ext} has been loaded")
         except Exception as err:
             logging.exception(f"An error occurred whilst loading {ext}", exc_info=err)
+
 
 @bot.event
 async def on_ready():
@@ -96,7 +100,7 @@ async def on_user_update(_, after):
                     "name": after.name,
                     "avatar": {
                         "hash": after.avatar,
-                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}" # ffs stay consistent
+                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}"  # ffs stay consistent
                     }
                 }
             })
@@ -111,7 +115,7 @@ async def on_user_update(_, after):
                     "fullUsername": f"{after.name}#{after.discriminator}",
                     "avatar": {
                         "hash": after.avatar,
-                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}" # ffs
+                        "url": f"https://cdn.discordapp.com/avatars/{after.id}/{after.avatar}"  # ffs
                     }
                 }
             })
@@ -120,7 +124,7 @@ async def on_user_update(_, after):
 @bot.event
 async def on_member_join(member):
     if member.bot:
-        db_bot = await db["bots"].find_one({"_id": str(member.id)})
+        db_bot = await db.bots.find_one({"_id": str(member.id)})
 
         if str(member.guild.id) == settings["guilds"]["main"]:
             if db_bot:
@@ -141,7 +145,7 @@ async def on_member_join(member):
 
     elif str(member.guild.id) == settings["guilds"]["main"]:
 
-        bots = await db["bots"].find({"owner": {"_id": str(member.id)}})
+        bots = await db.bots.find({"owner": {"id": str(member.id)}})
 
         for discord_bot in bots:
             if discord_bot["status"]["approved"]:
@@ -149,32 +153,74 @@ async def on_member_join(member):
                                        reason="User is a Developer on the website.")
                 break
 
+
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, (discord.Forbidden, commands.CommandNotFound)):
         return
 
     if isinstance(error, NoMod):
-        return await ctx.send("Looks like you ain't a moderator kiddo")
+        return await ctx.channel.send(f"{settings['formats']['noPerms']} **Invalid permission(s):** You need "
+                                      f"to be a Moderator to execute this command.")
 
     if isinstance(error, NoSomething):
-        return await ctx.send(error.message)
+        return await ctx.channel.send(error.message)
 
     if isinstance(error, commands.CheckFailure) and error.args:
-        return await ctx.send(error.args[0])
+        return await ctx.channel.send(error)
 
     if isinstance(error, commands.CommandError) and error.args:
-        return await ctx.send(error.args[0])
+        return await ctx.channel.send(error.args[0])
 
     logging.exception("something done fucked up", exc_info=error)
-    await ctx.send("something fucked up")
-
 
 @bot.event
 async def on_message(msg):
     if not msg.author.bot:
         ctx = await bot.get_context(msg, cls=EditingContext)
         await bot.invoke(ctx)
+
+        ticket = await bot.db.tickets.find_one({
+            "ids.channel": str(ctx.channel.id)
+        })
+
+        if ticket and ticket["status"] == 0:
+            bot_db = await ctx.bot.db.bots.find_one({
+                "_id": str(ticket["ids"]["bot"])
+            })
+
+            if bot_db and bot_db["owner"]["id"] == str(ctx.author.id):
+                message = await ctx.channel.fetch_message(int(ticket["ids"]["message"]))
+
+                embed = message.embeds[0]
+                embed.colour = 0xffec00
+                embed.title = f"Approval Feedback - {ticket['_id']} [DEV REPLIED]"
+
+                await message.edit(embed=embed)
+
+                await ctx.send(f"{bot.settings['formats']['ticketStatus']} **Ticket update:** Changed ticket "
+                               f"status to `Dev Replied`.")
+
+                ticket = await bot.db.tickets.find_one({
+                    "ids.message": str(message.id)
+                })
+
+                log_msg = await ctx.guild.get_channel(int(bot.settings["channels"]["ticketLog"])) \
+                    .fetch_message(int(ticket["ids"]["log"]))
+
+                embed2 = log_msg.embeds[0]
+                embed2.colour = 0xffec00
+                embed2.title = f"Approval Feedback - {ticket['_id']} [DEV REPLIED]"
+
+                await log_msg.edit(embed=embed2)
+
+                await ctx.bot.db.tickets.update_one({"_id": ticket["_id"]}, {
+                    "$set": {
+                        "status": 3
+                    }
+                })
+
+
 
 
 @bot.event
