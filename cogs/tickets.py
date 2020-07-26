@@ -41,7 +41,8 @@ class TicketCog(commands.Cog):
             if not check_db:
                 return generated
 
-    @commands.command(name="open-ticket", aliases=["new-ticket", "nt", "ot", "request-changes", "rc"])
+    @commands.command(name="open-ticket", aliases=["new-ticket", "nt", "ot", "request-changes", "rc", "create-ticket",
+                                                   "open", "create"])
     @commands.guild_only()
     @mod_check()
     async def open_ticket(self, ctx, bot: discord.User):
@@ -81,6 +82,8 @@ class TicketCog(commands.Cog):
             embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                              icon_url=self.bot.settings["images"]["awaiting_response"])
 
+            embed.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+
             message = await channel.send(content=owner.mention, embed=embed,
                                          allowed_mentions=discord.AllowedMentions(users=True))
 
@@ -93,7 +96,11 @@ class TicketCog(commands.Cog):
             embed2.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                               icon_url=self.bot.settings["images"]["awaiting_response"])
 
+            embed2.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+
             embed2.add_field(name="Channel", value=f"<#{channel.id}>")
+            embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
+                                                     f"{owner.id}) (`{owner.id}`)")
 
             log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
             log_msg = await log_channel.send(embed=embed2)

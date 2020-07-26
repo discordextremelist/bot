@@ -18,16 +18,15 @@
     "url": "https://discordextremelist.xyz"
   },
   "roles": {
-    "unapprovedBot": "",
-    "bot": "",
-    "verifiedBot": "",
-    "serverOwner": "",
-    "developer": "",
-    "verifiedDeveloper": "",
-    "staff": "",
-    "mod": "",
-    "admin": "",
-    "unlisted": ""
+    "unapprovedBot": "633141192497823784",
+    "bot": "568587927265869824",
+    "premiumBot": "568970918647300116",
+    "serverOwner": "623052263295942657",
+    "developer": "568572172151291929",
+    "staff": "568568238250917909",
+    "mod": "568568238250917909",
+    "admin": "568568341414019086",
+    "unlisted": "736732871708115024"
   },
   "colours": {
     "awaiting_fixes": "0xf73538",
@@ -35,15 +34,15 @@
     "closed": "0xe40707"
   },
   "channels": {
-    "ticketCategory": "736545513092153405",
-    "ticketLog": "736545547112022036",
-    "messageLog": "736569881494814730"
+    "ticketCategory": "736820335629828159",
+    "ticketLog": "736820647484981268",
+    "messageLog": "736823970334113862"
   },
   "images": {
-    "awaiting_fixes": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_fixes.png",
-    "awaiting_response": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_response.png",
-    "closed": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/closed.png",
-    "dev_replied": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/dev_replied.png"
+    "awaiting_fixes": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_fixes-1.png",
+    "awaiting_response": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_response-2.png",
+    "closed": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/closed-3.png",
+    "dev_replied": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/dev_replied-4.png"
   },
   "formats": {
     "error": "<:error:621988943314812928> |",
