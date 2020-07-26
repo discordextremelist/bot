@@ -82,7 +82,7 @@ class TicketCog(commands.Cog):
             embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                              icon_url=self.bot.settings["images"]["awaiting_response"])
 
-            embed.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+            embed.set_footer(text=f"{str(bot)} ({bot.id})", icon_url=str(bot.avatar_url))
 
             message = await channel.send(content=owner.mention, embed=embed,
                                          allowed_mentions=discord.AllowedMentions(users=True))
