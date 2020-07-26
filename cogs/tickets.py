@@ -73,7 +73,7 @@ class TicketCog(commands.Cog):
             }
 
             channel = await category.create_text_channel(name=bot.name.lower(), overwrites=overwrites,
-                                                         reason=f"Approval feedback channel - {ctx.author.id}")
+                                                         reason=f"Approval feedback channel - {ctx.author.id}", topic="{self.bot.settings['website']['url']}/bots/{bot.id}}")
 
             embed = discord.Embed(colour=self.awaiting_response,
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
