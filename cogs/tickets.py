@@ -96,7 +96,7 @@ class TicketCog(commands.Cog):
             embed2.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                               icon_url=self.bot.settings["images"]["awaiting_response"])
 
-            embed2.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+            embed2.set_footer(text=f"{str(bot)} ({bot.id})", icon_url=str(bot.avatar_url))
 
             embed2.add_field(name="Channel", value=f"<#{channel.id}>")
             embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
