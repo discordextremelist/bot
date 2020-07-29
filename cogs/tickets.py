@@ -65,7 +65,7 @@ class TicketCog(commands.Cog):
 
             owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
             mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
-            rdanny = ctx.guild.get_member(80528701850124288) # R. Danny
+            serverbots = ctx.guild.get_member(716174811629486141) # bot power role
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
