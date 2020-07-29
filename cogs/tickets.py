@@ -65,11 +65,13 @@ class TicketCog(commands.Cog):
 
             owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
             mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
+            rdanny = ctx.guild.get_member(80528701850124288) # R. Danny
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                 owner: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                mods: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                mods: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                serverbots: discord.PermissionOverwrite(read_messages=True, send_messages=True)
             }
 
             channel = await category.create_text_channel(name=bot.name.lower(), overwrites=overwrites,
