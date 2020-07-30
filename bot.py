@@ -145,7 +145,7 @@ async def on_member_join(member):
 
     elif str(member.guild.id) == settings["guilds"]["main"]:
 
-        bots = await db.bots.find({"owner": {"id": str(member.id)}})
+        bots = await db.bots.find_one({"owner": {"id": str(member.id)}})
 
         for discord_bot in bots:
             if discord_bot["status"]["approved"]:
