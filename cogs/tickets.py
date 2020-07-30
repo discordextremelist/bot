@@ -217,7 +217,8 @@ class TicketCog(commands.Cog):
             await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
                 "$set": {
                     "status": 2,
-                    "closureReason": reason
+                    "closureReason": reason,
+                    "ids.history": str(message_history.id)
                 }
             })
         else:
