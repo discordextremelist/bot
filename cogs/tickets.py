@@ -186,7 +186,7 @@ class TicketCog(commands.Cog):
                     f"long. (`{len(reason) / 500}`)")
 
             if message_id:
-                bot = ctx.guild.get_member(int(message_id["ids"]["bot"]))
+                channel_name = ctx.channel.name
 
                 messages = []
                 for message in await ctx.channel.history().flatten():
@@ -209,7 +209,7 @@ class TicketCog(commands.Cog):
                 embed = log_message.embeds[0]
                 embed.colour = self.closed
                 embed.remove_field(0)
-                embed.insert_field_at(0, name="Channel", value=f"[#{bot.name.lower()}](https://txt.discord.website/?txt="
+                embed.insert_field_at(0, name="Channel", value=f"[#{channel_name}](https://txt.discord.website/?txt="
                                                             f"{self.bot.settings['channels']['messageLog']}"
                                                             f"/{message_history.attachments[0].id}/{message_id['_id']})")
 
