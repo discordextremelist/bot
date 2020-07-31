@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
+import traceback
 from io import BytesIO
 
 import snowflake
@@ -173,6 +174,8 @@ class TicketCog(commands.Cog):
     @commands.guild_only()
     @mod_check()
     async def close_ticket(self, ctx, *, reason: str):
+
+        try:
         message_id = await self.bot.db.tickets.find_one({
             "ids.channel": str(ctx.channel.id)
         })
@@ -224,6 +227,10 @@ class TicketCog(commands.Cog):
         else:
             return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
                                   f"ticket channel.")
+        except Exception as e:
+            tb = traceback.format_exception(type(e), e, e.__traceback__)
+            print("".join(tb))
+            await ctx.author.send(f"Error occured! {e}")
 
 
 def setup(bot):
