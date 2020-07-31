@@ -142,16 +142,11 @@ async def on_member_join(member):
                 if db_bot["status"]["approved"]:
                     await member.add_roles(discord.Object(id=int(settings["roles"]["unapprovedBot"])),
                                            reason="Bot is not approved on the website.")
-
     elif str(member.guild.id) == settings["guilds"]["main"]:
-
-        bots = await db.bots.find_one({"owner": {"id": str(member.id)}})
-
-        for discord_bot in bots:
-            if discord_bot["status"]["approved"]:
-                await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])),
-                                       reason="User is a Developer on the website.")
-                break
+        db_bot = await db.bots.find_one({"owner": {"id": str(member.id)}})
+        if db_bot is not None and db_bot["status"]["approved"]:
+            await member.add_roles(discord.Object(id=int(settings["roles"]["developer"])),
+                                   reason="User is a Developer on the website.")
 
 
 @bot.event
