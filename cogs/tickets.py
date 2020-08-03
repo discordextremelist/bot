@@ -106,8 +106,8 @@ class TicketCog(commands.Cog):
                                                      f"{owner.id}) (`{owner.id}`)")
 
             testguild = self.bot.get_guild(int(self.bot.settings['guilds']['staff']))
-            fixesrole = delguild.get_role(int(self.bot.settings['roles']['fixesBot']))
-            memberbot = delguild.get_member(bot.id)
+            fixesrole = testguild.get_role(int(self.bot.settings['roles']['fixesBot']))
+            memberbot = testguild.get_member(bot.id)
             if memberbot is not None:
                 await memberbot.add_roles(fixesrole, reason='Bot is Awaiting Fixes.')
 
