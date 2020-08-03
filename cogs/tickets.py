@@ -66,7 +66,7 @@ class TicketCog(commands.Cog):
 
             owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
             mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
-            serverbots = ctx.guild.get_role(716174811629486141) # bot power role
+            serverbots = ctx.guild.get_role(self.bot.settings['roles']['botpower']) # bot power role
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -106,7 +106,7 @@ class TicketCog(commands.Cog):
                                                      f"{owner.id}) (`{owner.id}`)")
 
             testguild = self.bot.get_guild(int(self.bot.settings['guilds']['staff']))
-            fixesrole = delguild.get_role(662230379326865429)
+            fixesrole = delguild.get_role(int(self.bot.settings['roles']['fixesBot']))
             memberbot = delguild.get_member(bot.id)
             if memberbot is not None:
                 await memberbot.add_roles(fixesrole, reason='Bot is Awaiting Fixes.')
