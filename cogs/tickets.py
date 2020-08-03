@@ -105,7 +105,7 @@ class TicketCog(commands.Cog):
             embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
                                                      f"{owner.id}) (`{owner.id}`)")
 
-            testguild = self.bot.get_guild(['guilds']['staff'])
+            testguild = self.bot.get_guild(int(self.bot.settings['guilds']['staff']))
             fixesrole = delguild.get_role(662230379326865429)
             memberbot = delguild.get_member(bot.id)
             if memberbot is not None:
