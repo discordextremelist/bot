@@ -66,7 +66,7 @@ class TicketCog(commands.Cog):
 
             owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
             mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
-            serverbots = ctx.guild.get_role(716174811629486141) # bot power role
+            serverbots = ctx.guild.get_role(int(self.bot.settings['roles']['botpower']))
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -104,6 +104,12 @@ class TicketCog(commands.Cog):
             embed2.add_field(name="Channel", value=f"<#{channel.id}>")
             embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
                                                      f"{owner.id}) (`{owner.id}`)")
+
+            testguild = self.bot.get_guild(int(self.bot.settings['guilds']['staff']))
+            fixesrole = testguild.get_role(int(self.bot.settings['roles']['fixesBot']))
+            memberbot = testguild.get_member(bot.id)
+            if memberbot is not None:
+                await memberbot.add_roles(fixesrole, reason='Bot is Awaiting Fixes.')
 
             log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
             log_msg = await log_channel.send(embed=embed2)
