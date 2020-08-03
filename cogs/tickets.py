@@ -105,6 +105,11 @@ class TicketCog(commands.Cog):
             embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
                                                      f"{owner.id}) (`{owner.id}`)")
 
+            delguild = self.bot.get_guild(632908146305925129)
+            fixesrole = delguild.get_role(662230379326865429)
+            memberbot = delguild.get_member(bot.id)
+            await memberbot.add_roles(fixesrole, reason='Bot is Awaiting Fixes.')
+
             log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
             log_msg = await log_channel.send(embed=embed2)
 
