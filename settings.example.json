@@ -1,6 +1,6 @@
 {
   "token": "",
-  "prefix": ["del,"],
+  "prefix": ["del,", "DEL,"],
   "mongo": {
     "uri": "mongodb://localhost:27017",
     "db": "del"
