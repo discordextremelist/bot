@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
+import traceback
 from io import BytesIO
 
 import snowflake
@@ -65,15 +66,17 @@ class TicketCog(commands.Cog):
 
             owner = ctx.guild.get_member(int(bot_db["owner"]["id"]))
             mods = ctx.guild.get_role(int(self.bot.settings["roles"]["mod"]))
+            serverbots = ctx.guild.get_role(int(self.bot.settings['roles']['botpower']))
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
                 owner: discord.PermissionOverwrite(read_messages=True, send_messages=True),
-                mods: discord.PermissionOverwrite(read_messages=True, send_messages=True)
+                mods: discord.PermissionOverwrite(read_messages=True, send_messages=True),
+                serverbots: discord.PermissionOverwrite(read_messages=True, send_messages=True)
             }
 
             channel = await category.create_text_channel(name=bot.name.lower(), overwrites=overwrites,
-                                                         reason=f"Approval feedback channel - {ctx.author.id}")
+                                                         reason=f"Approval feedback channel - {ctx.author.id}", topic=f"{self.bot.settings['website']['url']}/bots/{bot.id}")
 
             embed = discord.Embed(colour=self.awaiting_response,
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
@@ -82,7 +85,7 @@ class TicketCog(commands.Cog):
             embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                              icon_url=self.bot.settings["images"]["awaiting_response"])
 
-            embed.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+            embed.set_footer(text=f"{str(bot)} ({bot.id})", icon_url=str(bot.avatar_url))
 
             message = await channel.send(content=owner.mention, embed=embed,
                                          allowed_mentions=discord.AllowedMentions(users=True))
@@ -96,11 +99,17 @@ class TicketCog(commands.Cog):
             embed2.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                               icon_url=self.bot.settings["images"]["awaiting_response"])
 
-            embed2.set_footer(text=str(bot), icon_url=str(bot.avatar_url))
+            embed2.set_footer(text=f"{str(bot)} ({bot.id})", icon_url=str(bot.avatar_url))
 
             embed2.add_field(name="Channel", value=f"<#{channel.id}>")
             embed2.add_field(name="Developer", value=f"[{str(owner)}]({self.bot.settings['website']['url']}/users/"
                                                      f"{owner.id}) (`{owner.id}`)")
+
+            testguild = self.bot.get_guild(int(self.bot.settings['guilds']['staff']))
+            fixesrole = testguild.get_role(int(self.bot.settings['roles']['fixesBot']))
+            memberbot = testguild.get_member(bot.id)
+            if memberbot is not None:
+                await memberbot.add_roles(fixesrole, reason='Bot is Awaiting Fixes.')
 
             log_channel = ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"]))
             log_msg = await log_channel.send(embed=embed2)
@@ -173,56 +182,63 @@ class TicketCog(commands.Cog):
     @commands.guild_only()
     @mod_check()
     async def close_ticket(self, ctx, *, reason: str):
-        message_id = await self.bot.db.tickets.find_one({
-            "ids.channel": str(ctx.channel.id)
-        })
 
-        if len(reason) > 500:
-            return await ctx.send(
-                f"{self.bot.settings['formats']['error']} **Invalid length:** The reason you provided is too "
-                f"long. (`{len(reason) / 500}`)")
-
-        if message_id:
-            bot = ctx.guild.get_member(int(message_id["ids"]["bot"]))
-
-            messages = []
-            for message in await ctx.channel.history().flatten():
-                messages.append(f"[{message.created_at}] {message.author} - {message.content}\n")
-
-            messages.reverse()
-            file = discord.File(BytesIO(("".join(messages)).encode("utf-8")), filename=f"{message_id['_id']}.txt")
-
-            await ctx.channel.delete(reason=f"Approval feedback closed - Author: {ctx.author.id}, Ticket ID: "
-                                            f"{message_id['_id']}")
-
-            log_message = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"])) \
-                .fetch_message(message_id["ids"]["log"])
-
-            guild = self.bot.get_guild(int(self.bot.settings["guilds"]["messageLog"]))
-
-            message_history = await guild.get_channel(int(self.bot.settings["channels"]["messageLog"])) \
-                .send(content=log_message.jump_url, file=file)
-
-            embed = log_message.embeds[0]
-            embed.colour = self.closed
-            embed.remove_field(0)
-            embed.insert_field_at(0, name="Channel", value=f"[#{bot.name.lower()}](https://txt.discord.website/?txt="
-                                                           f"{self.bot.settings['channels']['messageLog']}"
-                                                           f"/{message_history.attachments[0].id}/{message_id['_id']})")
-
-            embed.set_author(name=f"Approval Feedback - {message_id['_id']} [CLOSED]",
-                             icon_url=self.bot.settings["images"]["closed"])
-
-            await log_message.edit(embed=embed)
-            await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
-                "$set": {
-                    "status": 2,
-                    "closureReason": reason
-                }
+        try:
+            message_id = await self.bot.db.tickets.find_one({
+                "ids.channel": str(ctx.channel.id)
             })
-        else:
-            return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
-                                  f"ticket channel.")
+
+            if len(reason) > 500:
+                return await ctx.send(
+                    f"{self.bot.settings['formats']['error']} **Invalid length:** The reason you provided is too "
+                    f"long. (`{len(reason) / 500}`)")
+
+            if message_id:
+                channel_name = ctx.channel.name
+
+                messages = []
+                for message in await ctx.channel.history().flatten():
+                    messages.append(f"[{message.created_at}] {message.author} - {message.content}\n")
+
+                messages.reverse()
+                file = discord.File(BytesIO(("".join(messages)).encode("utf-8")), filename=f"{message_id['_id']}.txt")
+
+                await ctx.channel.delete(reason=f"Approval feedback closed - Author: {ctx.author.id}, Ticket ID: "
+                                                f"{message_id['_id']}")
+
+                log_message = await ctx.guild.get_channel(int(self.bot.settings["channels"]["ticketLog"])) \
+                    .fetch_message(message_id["ids"]["log"])
+
+                guild = self.bot.get_guild(int(self.bot.settings["guilds"]["messageLog"]))
+
+                message_history = await guild.get_channel(int(self.bot.settings["channels"]["messageLog"])) \
+                    .send(content=log_message.jump_url, file=file)
+
+                embed = log_message.embeds[0]
+                embed.colour = self.closed
+                embed.remove_field(0)
+                embed.insert_field_at(0, name="Channel", value=f"[#{channel_name}](https://txt.discord.website/?txt="
+                                                            f"{self.bot.settings['channels']['messageLog']}"
+                                                            f"/{message_history.attachments[0].id}/{message_id['_id']})")
+
+                embed.set_author(name=f"Approval Feedback - {message_id['_id']} [CLOSED]",
+                                icon_url=self.bot.settings["images"]["closed"])
+
+                await log_message.edit(embed=embed)
+                await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
+                    "$set": {
+                        "status": 2,
+                        "closureReason": reason,
+                        "ids.history": str(message_history.id)
+                    }
+                })
+            else:
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
+                                    f"ticket channel.")
+        except Exception as e:
+            tb = traceback.format_exception(type(e), e, e.__traceback__)
+            print("".join(tb))
+            await ctx.author.send(f"Error occured! {e}")
 
 
 def setup(bot):
