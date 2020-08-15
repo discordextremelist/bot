@@ -69,7 +69,7 @@ class TicketCog(commands.Cog):
             serverbots = ctx.guild.get_role(int(self.bot.settings['roles']['botpower']))
             
             if owner is None:
-                return await ctx.send("Bot owner is not in the server!")
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Owner Missing:** bot owner is not in the server!")
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
