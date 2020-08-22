@@ -17,6 +17,7 @@
 
 import discord
 import traceback
+import typing
 from io import BytesIO
 
 import snowflake
@@ -46,7 +47,19 @@ class TicketCog(commands.Cog):
                                                    "open", "create"])
     @commands.guild_only()
     @mod_check()
-    async def open_ticket(self, ctx, bot: discord.User):
+    async def open_ticket(self, ctx, bot: typing.Union[discord.User, str]):
+        
+        if isinstance(bot, discord.User):
+            pass
+        elif isinstance(bot, str):
+            if bot.isdigit():
+                try:
+                    bot = await ctx.bot.fetch_user(bot)
+                except Exception as e:
+                    return await ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```py\n{e}```")
+            elif not bot.isdigit():
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid argument:** {bot} was not found. Try using ID so I could fetch them.")
+                                           
         if not bot.bot:
             return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid bot:** {bot} is not a bot.")
 
