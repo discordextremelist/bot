@@ -58,7 +58,7 @@ class TicketCog(commands.Cog):
                 except Exception as e:
                     return await ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```py\n{e}```")
             elif not bot.isdigit():
-                return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid argument:** {bot} was not found. Try using ID so I could fetch them.")
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Unknown bot:** We could not find a bot with the arguments you provided - Try using an ID so I can fetch it?")
                                            
         if not bot.bot:
             return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid bot:** {bot} is not a bot.")
