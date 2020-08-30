@@ -43,35 +43,17 @@ class HelpCog(commands.Cog):
                 embed = discord.Embed(colour=colour)
 
                 if command in ["jsk", "jishaku"]:
-                    embed.add_field(name=f"{self.bot.settings['emoji']['infoBook']} Help: jishaku",
-                                    value=f"Provides general information on the usage of what jishaku does.",
-                                    inline=False)
+                    jishaku = self.bot.get_command('jishaku')
+                    subcommands = ''
+                    for command in jishaku.commands:
+                        subcommands += f"• {command.name} - `{command.short_doc}`\n"
+                    embed.title = f"{self.bot.settings['emoji']['notepad']} Help: jishaku"
+                    embed.description = f'{self.bot.settings['emoji']['speech']} **Subcommands:**\n{sucommands}'
                     embed.add_field(name=f"{self.bot.settings['emoji']['notepad']} Aliases", value="jsk")
                     embed.add_field(name=f"{self.bot.settings['emoji']['notepad']} Usage",
                                     value="jishaku <subCommand> <arguments>")
                     embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Information",
-                                    value=f"```The Jishaku debug and diagnostic commands.\n\nThis command on its own "
-                                          f"gives a status brief.\nAll other functionality is within its subcommands."
-                                          f"```", inline=False)
-                    embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Sub-Commands",
-                                    value="```py\ncancel \"Cancels a task with the given index.\"\ncat = \""
-                                          "Read out a file, using syntax highlighting if detected.\"\ncurl \"Download "
-                                          "and display a text file from the internet.\"\ndebug \"Run a command timing "
-                                          "execution and catching exceptions.\"\ngit \"Shortcut for \'jsk sh git\'. "
-                                          "Invokes the system shell.\"\nhide \"Hides Jishaku from the help command."
-                                          "\"\nin \"Run a command as if it were run in a different channel.\"\nload \""
-                                          "Loads or reloads the given extension names.\"\npy \"Direct evaluation of "
-                                          "Python code.\"\npy_inspect \"Evaluation of Python code with inspect "
-                                          "information.\"```", inline=False)
-                    embed.add_field(name="\u200B",
-                                    value="```py\nrepeat \"Runs a command multiple times in a row.\"\nretain \""
-                                          "Turn variable retention for REPL on or off.\"\nshell \"Executes statements "
-                                          "in the system shell.\"\nshow \"Shows Jishaku in the help command."
-                                          "\"\nshutdown \"Logs this bot out.\"\nsource \"Displays the source code for "
-                                          "a command.\"\nsu \"Run a command as someone else.\"\nsudo \"Run a command "
-                                          "bypassing all checks and cooldowns.\"\ntasks \"Shows the currently running "
-                                          "jishaku tasks.\"\nunload \"Unloads the given extension names."
-                                          "\"\nvoice \"Voice-related commands.\"```", inline=False)
+                                    value=jishaku.help, inline=False)
                 else:
                     cmd = self.bot.get_command(command)
 
