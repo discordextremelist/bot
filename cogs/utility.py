@@ -239,7 +239,7 @@ class UtilityCog(commands.Cog):
                     f"{self.bot.settings['formats']['error']} **Unknown account:** You need to have authenticated on "
                     f"our website before to use this command.")
 
-    @commands.command(name="showbots", aliases=["bl", "hasbots", "hasbot", "bots"], usage="userinfo <user>")
+    @commands.command(name="showbots", aliases=["bl", "hasbots", "hasbot", "bots"], usage="showbots <user>")
     async def show_bots(self, ctx, *, user: discord.User = None):
         """
         Allows you to view the bots a specified user has.
