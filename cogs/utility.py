@@ -66,8 +66,45 @@ class UtilityCog(commands.Cog):
 
             embed = discord.Embed(colour=await self.embed_colour(ctx))
 
-            embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Username", value=db_user["fullUsername"])
+            acknowledgements = []
+            badges = []
+
+            if db_user["rank"]["admin"]:
+                acknowledgements.append("Website Administrator")
+                badges.append(self.bot.settings["emoji"]["crown"])
+
+            if db_user["rank"]["assistant"]:
+                acknowledgements.append("Website Assistant")
+                badges.append(self.bot.settings["emoji"]["assistant"])
+
+            if db_user["rank"]["mod"]:
+                acknowledgements.append("Website Moderator")
+                badges.append(self.bot.settings["emoji"]["hammer"])
+
+            if db_user["rank"]["premium"]:
+                acknowledgements.append("Donator")
+                badges.append(self.bot.settings["emoji"]["heart"])
+
+            if db_user["rank"]["tester"]:
+                acknowledgements.append("Tester")
+                badges.append(self.bot.settings["emoji"]["tube"])
+
+            if db_user["rank"]["translator"]:
+                acknowledgements.append("Translator")
+                badges.append(self.bot.settings["emoji"]["url"])
+
+            if db_user["rank"]["covid"]:
+                acknowledgements.append("COVID-19 Donator")
+                badges.append(self.bot.settings["emoji"]["shield"])
+
+            embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Username", value=f"{db_user['fullUsername']}"
+                                                                                            f" {' '.join(badges)}")
             embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"])
+
+            if acknowledgements is not None:
+                embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Acknowledgements",
+                                value="\n".join(acknowledgements), inline=False)
+
             embed.add_field(name=f"{self.bot.settings['emoji']['url']} Profile URL",
                             value=f"{self.bot.settings['website']['url']}/users/{db_user['_id']}", inline=False)
             embed.set_thumbnail(url=f"{db_user['avatar']['url']}")

@@ -59,4 +59,4 @@ class DelUser(TypedDict):
     profile: DelUserProfile
     game: DelUserGame
     rank: DelUserRank
-    staffTracking: DelUserStaffTracking
+    staffTracking: DelStaffTracking
