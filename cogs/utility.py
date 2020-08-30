@@ -21,6 +21,7 @@ from ext.checks import *
 
 import datetime
 from time import monotonic
+from typing import List
 from .types import globalTypes, botTypes, userTypes
 
 
@@ -237,6 +238,41 @@ class UtilityCog(commands.Cog):
                 return await ctx.send(
                     f"{self.bot.settings['formats']['error']} **Unknown account:** You need to have authenticated on "
                     f"our website before to use this command.")
+
+    @commands.command(name="showbots", aliases=["bl", "hasbots", "hasbot", "bots"], usage="userinfo <user>")
+    async def show_bots(self, ctx, *, user: discord.User = None):
+        """
+        Allows you to view the bots a specified user has.
+        """
+        async with ctx.channel.typing():
+
+            if user is None:
+                user = ctx.author
+
+            db_bots = self.bot.db.bots.find({"owner": {"id": str(user.id)}})
+
+            if user.bot:
+                return await ctx.send(
+                    f"{self.bot.settings['formats']['error']} **Bots can't own bots:** Bot's can't make bots... "
+                    f"AI robots please don't kill me...")
+
+            formatted_bots = []
+            async for db_bot in db_bots:
+                db_bot: botTypes.DelBot
+                formatted_bots.append(
+                    f"• [{db_bot['name']}]({self.bot.settings['website']['url']}/bots/{db_bot['_id']}) "
+                    f"(`{db_bot['_id']}`)")
+
+            if not formatted_bots:
+                return await ctx.send(
+                    f"{self.bot.settings['formats']['error']} **No bots:** This user has no bots listed.")
+
+            embed = discord.Embed(colour=await self.embed_colour(ctx))
+            embed.add_field(name=f"{self.bot.settings['emoji']['robot']} {str(user)}'s Bot(s)", value="\n".join(formatted_bots),
+                            inline=False)
+            embed.set_thumbnail(url=f"{ctx.author.avatar_url}")
+
+            await ctx.send(embed=embed)
 
 
 def setup(bot):

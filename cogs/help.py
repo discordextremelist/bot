@@ -108,8 +108,8 @@ class HelpCog(commands.Cog):
                     embed.add_field(name=f"{self.bot.settings['emoji']['home']} Help: Menu",
                                     value=f"All commands use the prefix `{'`, `'.join(self.bot.settings['prefix'])}` "
                                           f"or `@{self.bot.user}`")
-                    embed.add_field(name=f"{self.bot.settings['emoji']['toolbox']} Utility Commands (4)",
-                                    value="`ping`, `userinfo`, `botinfo`, `token`", inline=False)
+                    embed.add_field(name=f"{self.bot.settings['emoji']['toolbox']} Utility Commands (5)",
+                                    value="`ping`, `userinfo`, `botinfo`, `showbots`, `token`", inline=False)
 
                 db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
                 if db_user and db_user["rank"]["mod"]:
