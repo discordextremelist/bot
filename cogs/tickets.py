@@ -21,6 +21,7 @@ from ext.checks import mod_check
 
 import traceback
 import snowflake
+import typing
 from io import BytesIO
 
 from .types import ticketTypes
