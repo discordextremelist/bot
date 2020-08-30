@@ -16,13 +16,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
+from discord.ext import commands
+from ext.checks import mod_check
+
+import snowflake
 import traceback
 from io import BytesIO
 
-import snowflake
-from discord.ext import commands
-
-from ext.checks import mod_check
+from .types import ticketTypes
 
 
 class TicketCog(commands.Cog):
@@ -37,7 +38,7 @@ class TicketCog(commands.Cog):
     async def snowflake_generate(self):
         while True:
             generated = self.generator.generate()
-            check_db = await self.bot.db.tickets.find_one({"_id": str(generated)})
+            check_db: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({"_id": str(generated)})
 
             if not check_db:
                 return generated
@@ -76,7 +77,8 @@ class TicketCog(commands.Cog):
             }
 
             channel = await category.create_text_channel(name=bot.name.lower(), overwrites=overwrites,
-                                                         reason=f"Approval feedback channel - {ctx.author.id}", topic=f"{self.bot.settings['website']['url']}/bots/{bot.id}")
+                                                         reason=f"Approval feedback channel - {ctx.author.id}",
+                                                         topic=f"{self.bot.settings['website']['url']}/bots/{bot.id}")
 
             embed = discord.Embed(colour=self.awaiting_response,
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
@@ -134,7 +136,7 @@ class TicketCog(commands.Cog):
     async def awaiting_fixes(self, ctx):
         await ctx.message.delete()
 
-        status_check = await self.bot.db.tickets.find_one({
+        status_check: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({
             "ids.channel": str(ctx.channel.id)
         })
 
@@ -151,7 +153,7 @@ class TicketCog(commands.Cog):
             await ctx.send(f"{self.bot.settings['formats']['ticketStatus']} **Ticket update:** Changed ticket "
                            f"status to `Awaiting Fixes`.")
 
-            ticket = await self.bot.db.tickets.find_one({
+            ticket: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({
                 "ids.message": str(message.id)
             })
 
@@ -184,7 +186,7 @@ class TicketCog(commands.Cog):
     async def close_ticket(self, ctx, *, reason: str):
 
         try:
-            message_id = await self.bot.db.tickets.find_one({
+            message_id: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({
                 "ids.channel": str(ctx.channel.id)
             })
 
@@ -218,11 +220,12 @@ class TicketCog(commands.Cog):
                 embed.colour = self.closed
                 embed.remove_field(0)
                 embed.insert_field_at(0, name="Channel", value=f"[#{channel_name}](https://txt.discord.website/?txt="
-                                                            f"{self.bot.settings['channels']['messageLog']}"
-                                                            f"/{message_history.attachments[0].id}/{message_id['_id']})")
+                                                               f"{self.bot.settings['channels']['messageLog']}"
+                                                               f"/{message_history.attachments[0].id}/"
+                                                               f"{message_id['_id']})")
 
                 embed.set_author(name=f"Approval Feedback - {message_id['_id']} [CLOSED]",
-                                icon_url=self.bot.settings["images"]["closed"])
+                                 icon_url=self.bot.settings["images"]["closed"])
 
                 await log_message.edit(embed=embed)
                 await ctx.bot.db.tickets.update_one({"_id": str(message_id['_id'])}, {
@@ -233,8 +236,8 @@ class TicketCog(commands.Cog):
                     }
                 })
             else:
-                return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
-                                    f"ticket channel.")
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a "
+                                      f"valid ticket channel.")
         except Exception as e:
             tb = traceback.format_exception(type(e), e, e.__traceback__)
             print("".join(tb))

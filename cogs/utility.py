@@ -14,13 +14,14 @@
 
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from time import monotonic
-import datetime
 
 import discord
 from discord.ext import commands
-
 from ext.checks import *
+
+import datetime
+from time import monotonic
+from .types import globalTypes, botTypes, userTypes
 
 
 class UtilityCog(commands.Cog):
@@ -49,6 +50,7 @@ class UtilityCog(commands.Cog):
         ping = (monotonic() - before) * 1000
         await ctx.send(f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is:** `{int(ping)}ms`")
 
+    # noinspection DuplicatedCode
     @commands.command(name="userinfo", aliases=["ui", "profile"], usage="userinfo <user>")
     async def user_info(self, ctx, *, user: discord.User = None):
         """
@@ -58,7 +60,7 @@ class UtilityCog(commands.Cog):
             if user is None:
                 user = ctx.author
 
-            db_user = await self.bot.db.users.find_one({"_id": str(user.id)})
+            db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(user.id)})
             if not db_user:
                 raise NoSomething(user)
 
@@ -72,6 +74,7 @@ class UtilityCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
+    # noinspection DuplicatedCode
     @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <bot>")
     async def robot_info(self, ctx, *, bot: discord.User):
         """
@@ -82,12 +85,12 @@ class UtilityCog(commands.Cog):
 
         async with ctx.channel.typing():
 
-            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+            db_bot: botTypes.DelBot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
 
             if not db_bot:
                 raise NoSomething(bot)
 
-            bot_owner = await self.bot.db.users.find_one({"_id": db_bot["owner"]["id"]})
+            bot_owner: userTypes.DelUser = await self.bot.db.users.find_one({"_id": db_bot["owner"]["id"]})
 
             embed = discord.Embed(colour=await self.embed_colour(ctx))
 
@@ -98,7 +101,7 @@ class UtilityCog(commands.Cog):
             embed.add_field(name=f"{self.bot.settings['emoji']['infoBook']} Library", value=db_bot["library"])
             embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Prefix", value=db_bot["prefix"])
             embed.add_field(name=f"{self.bot.settings['emoji']['shield']} Server Count",
-                            value=db_bot["serverCount"])
+                            value=str(db_bot["serverCount"]))
             embed.add_field(name=f"{self.bot.settings['emoji']['url']} Listing URL",
                             value=f"{self.bot.settings['website']['url']}/bots/{db_bot['_id']}", inline=False)
             embed.set_thumbnail(url=f"{db_bot['avatar']['url']}")
@@ -111,7 +114,7 @@ class UtilityCog(commands.Cog):
         Allows you to get the DELAPI token of the specified bot (provided you own it).
         """
         async with ctx.channel.typing():
-            db_bot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
+            db_bot: botTypes.DelBot = await self.bot.db.bots.find_one({"_id": str(bot.id)})
 
             if not db_bot:
                 raise NoSomething(bot)
@@ -142,12 +145,12 @@ class UtilityCog(commands.Cog):
         Allows you to get your temporary DELADMIN access token (admins only).
         """
         async with ctx.channel.typing():
-            db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+            db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
 
             if not db_user:
                 raise NoSomething(ctx.author)
 
-            token = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
+            token: globalTypes.DelAdminToken = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
 
             if token:
                 embed = discord.Embed(colour=await self.embed_colour(ctx))
@@ -179,7 +182,7 @@ class UtilityCog(commands.Cog):
         Allows you to reset your custom css if you've broken something
         """
         async with ctx.channel.typing():
-            db_user = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+            db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
 
             if not db_user:
                 raise NoSomething(ctx.author)
