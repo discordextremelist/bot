@@ -29,6 +29,7 @@ class UtilityCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.help_icon = f"{self.bot.settings['emoji']['toolbox']}"
 
     async def embed_colour(self, ctx):
         global colour
