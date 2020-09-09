@@ -35,6 +35,7 @@ class TicketCog(commands.Cog):
         self.closed = 0xdd2e44
         self.awaiting_response = 0x77ff77
         self.awaiting_fixes = 0xf4dd1a
+        self.help_icon = f"{self.bot.settings['emoji']['hammer']}"
 
     async def snowflake_generate(self):
         while True:
