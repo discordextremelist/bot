@@ -102,7 +102,7 @@ class UtilityCog(commands.Cog):
                                                                                             f" {' '.join(badges)}")
             embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"])
 
-            if acknowledgements is not None:
+            if acknowledgements != []:
                 embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Acknowledgements",
                                 value="\n".join(acknowledgements), inline=False)
 
