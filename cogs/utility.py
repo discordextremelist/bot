@@ -274,6 +274,21 @@ class UtilityCog(commands.Cog):
 
             await ctx.send(embed=embed)
 
+    @commands.command(name="subscribe", aliases=["unsubscribe", "unsub", "sub"], usage="subscribe")
+    async def subscribe(self, ctx):
+        async with ctx.channel.typing():
+            guild = self.bot.get_guild(int(self.bot.settings["guilds"]["main"]))
+            subscribe_role = guild.get_role(int(self.bot.settings["roles"]["subscribers"]))
+
+            if subscribe_role not in ctx.author.roles:
+                await ctx.author.add_roles(subscribe_role, reason="User has subscribed.")
+                await ctx.send(
+                    f"{self.bot.settings['formats']['success']} You have been subscribed to news pings.")
+            else:
+                await ctx.author.remove_roles(subscribe_role, reason="User has un-subscribed.")
+                await ctx.send(
+                    f"{self.bot.settings['formats']['success']} You have un-subscribed from news pings.")
+
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))
