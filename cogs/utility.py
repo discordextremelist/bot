@@ -246,8 +246,7 @@ class UtilityCog(commands.Cog):
         """
         async with ctx.channel.typing():
 
-            if user is None:
-                user = ctx.author
+            user = user or ctx.author
 
             db_bots = self.bot.db.bots.find({"owner": {"id": str(user.id)}})
 
@@ -270,7 +269,7 @@ class UtilityCog(commands.Cog):
             embed = discord.Embed(colour=await self.embed_colour(ctx))
             embed.add_field(name=f"{self.bot.settings['emoji']['robot']} {str(user)}'s Bot(s)", value="\n".join(formatted_bots),
                             inline=False)
-            embed.set_thumbnail(url=f"{ctx.author.avatar_url}")
+            embed.set_thumbnail(url=f"{user.avatar_url}")
 
             await ctx.send(embed=embed)
 
