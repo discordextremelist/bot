@@ -21,7 +21,6 @@ from ext.checks import *
 
 import datetime
 from time import monotonic
-from typing import Union
 from .types import globalTypes, botTypes, userTypes
 
 
@@ -344,7 +343,7 @@ class UtilityCog(commands.Cog):
                     user = await self.bot.fetch_user(note["by"])
                 except discord.NotFound:
                     user = note["by"]
-                embed.add_field(f"Note #{pos} (By {user}", value = note["note"])
+                embed.add_field(name = f"Note #{pos} (By {user}", value = note["note"])
             await ctx.send(embed = embed)
 
 def setup(bot):
