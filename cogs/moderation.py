@@ -122,26 +122,26 @@ class Moderation(commands.Cog):
                     print(e)
                     failed += 1
                     failed_list.append(f"{member.mention} - {e}")
-            muted = ""
-            notmuted = ""
+            banned = ""
+            notbanned = ""
             if success_list and not failed_list:
-                muted += "**I've successfully banned {0} member(s):**\n".format(total)
+                banned += "**I've successfully banned {0} member(s):**\n".format(total)
                 for num, res in enumerate(success_list, start=0):
-                    muted += f"`[{num+1}]` {res}\n"
-                await ctx.send(muted)
+                    banned += f"`[{num+1}]` {res}\n"
+                await ctx.send(banned)
             if success_list and failed_list:
-                muted += "**I've successfully banned {0} member(s):**\n".format(total - failed)
-                notmuted += f"**However I failed to ban the following {failed} member(s):**\n"
+                banned += "**I've successfully banned {0} member(s):**\n".format(total - failed)
+                notbanned += f"**However I failed to ban the following {failed} member(s):**\n"
                 for num, res in enumerate(success_list, start=0):
-                    muted += f"`[{num+1}]` {res}\n"
+                    banned += f"`[{num+1}]` {res}\n"
                 for num, res in enumerate(failed_list, start=0):
-                    notmuted += f"`[{num+1}]` {res}\n"
-                await ctx.send(muted + notmuted)
+                    notbanned += f"`[{num+1}]` {res}\n"
+                await ctx.send(banned + notbanned)
             if not success_list and failed_list:  
-                notmuted += f"**I failed to ban all the members:**\n"
+                notbanned += f"**I failed to ban all the members:**\n"
                 for num, res in enumerate(failed_list, start=0):
-                    notmuted += f"`[{num+1}]` {res}\n"
-                await ctx.send(notmuted)
+                    notbanned += f"`[{num+1}]` {res}\n"
+                await ctx.send(notbanned)
                     
         except Exception as e:
             print(e)
