@@ -21,7 +21,6 @@ from ext.checks import *
 
 import datetime
 from time import monotonic
-from typing import List
 from .types import globalTypes, botTypes, userTypes
 
 
@@ -288,6 +287,63 @@ class UtilityCog(commands.Cog):
                 await ctx.send(
                     f"{self.bot.settings['formats']['success']} You have un-subscribed from news pings.")
 
+    @commands.command(name="addnote", usage="addnote <bot> <note>")
+    async def addnote(self, ctx, bot = None, *, note = None):
+        db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+        if not db_user:
+            return await ctx.send("You can't use this command because you're not a moderator!")
+        if db_user["rank"]["admin"] or db_user["rank"]["assistant"] or db_user["rank"]["mod"]:
+            db_bot = self.bot.db.bots.find_one({"_id": int(bot)})
+            if db_bot == None:
+                return await ctx.send(f"`{bot}` is not a bot pending approval on **Discord Extreme List**!")
+            self.bot.db.bots.update_one({"_id": int(bot)}, {"$push": {"notes": {"note": note, "by": ctx.author.id}}})
+            return await ctx.send(f"I have added your note to `{bot}`!")
+    
+    @commands.command(name="removenote", usage="removenote <bot> <noteid>")
+    async def removenote(self, ctx, bot = None, noteid = None):
+        db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+        if not db_user:
+            return await ctx.send("You can't use this command because you're not a moderator!")
+        if db_user["rank"]["admin"] or db_user["rank"]["assistant"] or db_user["rank"]["mod"]:
+            db_bot = self.bot.db.bots.find_one({"_id": int(bot)})
+            if db_bot == None:
+                return await ctx.send(f"`{bot}` is not a bot pending approval on **Discord Extreme List**!")
+            if isinstance(noteid, int) == False:
+                return await ctx.send("Please provide a numeric noteid!")
+            if db_bot["notes"]:
+                notes = db_bot["notes"]
+            else:
+                return await ctx.send("This bot has no notes!")
+            pos = 0
+            for note in notes:
+                if pos == noteid - 1:
+                    self.bot.db.bots.update_one({"_id": int(bot)}, {"$pull": {"notes": {"note": note}}})
+                    return await ctx.send(f"I have removed the note from `{bot}`!")
+                pos += 1
+            await ctx.send(f"I wasn't able to remove that note!")    
+    
+    @commands.command(name="notes", usage="notes <bot>")
+    async def notes(self, ctx, bot = None):
+        db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
+        if not db_user:
+            return await ctx.send("You can't use this command because you're not a moderator!")
+        if db_user["rank"]["admin"] or db_user["rank"]["assistant"] or db_user["rank"]["mod"]:
+            db_bot = self.bot.db.bots.find_one({"_id": int(bot)})
+            if db_bot == None:
+                return await ctx.send(f"`{bot}` is not a bot pending approval on **Discord Extreme List**!")
+            if db_bot["notes"]:
+                notes = db_bot["notes"]
+            else:
+                return await ctx.send("This bot has no notes!")
+            embed = discord.Embed(title=f"{bot}'s Notes", colour=await self.embed_colour(ctx))
+            pos = 1
+            for note in notes:
+                try:
+                    user = await self.bot.fetch_user(note["by"])
+                except discord.NotFound:
+                    user = note["by"]
+                embed.add_field(name = f"Note #{pos} (By {user}", value = note["note"])
+            await ctx.send(embed = embed)
 
 def setup(bot):
     bot.add_cog(UtilityCog(bot))
