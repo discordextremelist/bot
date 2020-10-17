@@ -41,6 +41,8 @@ botExtensions = [
     "cogs.help",
     "cogs.utility",
     "cogs.tickets",
+    "cogs.notes",
+    "cogs.admin",
     "jishaku"
 ]
 
@@ -161,11 +163,15 @@ async def on_command_error(ctx, error):
     if isinstance(error, NoSomething):
         return await ctx.channel.send(error.message)
 
+    if isinstance(error, commands.MissingRequiredArgument):
+        return await ctx.send(f"{settings['formats']['error']} **Missing arguments:** Argument `{error.param.name}` "
+                              f"is required.")
+
     if isinstance(error, commands.CheckFailure) and error.args:
         return await ctx.channel.send(error)
 
     if isinstance(error, commands.CommandError) and error.args:
-        return await ctx.channel.send(error.args[0])
+        return await ctx.channel.send(error)
 
     logging.exception("something done fucked up", exc_info=error)
 
