@@ -37,6 +37,9 @@ class TicketCog(commands.Cog):
         self.awaiting_fixes = 0xf4dd1a
 
     async def snowflake_generate(self):
+        """
+        Generates a snowflake ID and checks to ensure it is not a duplicate.
+        """
         while True:
             generated = self.generator.generate()
             check_db: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({"_id": str(generated)})

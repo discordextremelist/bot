@@ -14,6 +14,7 @@
 
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import datetime
 import time
 
@@ -39,6 +40,9 @@ class BotNotesCog(commands.Cog):
         self.bot = bot
 
     async def embed_colour(self, ctx):
+        """
+        Gets the bots display colour and returns a colour code able to be used on embeds.
+        """
         global colour
 
         bot_guild_member = await ctx.guild.fetch_member(self.bot.user.id)
@@ -50,6 +54,10 @@ class BotNotesCog(commands.Cog):
         return colour
 
     async def check_bot(self, ctx, bot: typing.Union[discord.User, str]):
+        """
+        Runs the inputted string or discord.User object through various tests to determine if it is a
+        Discord bot in the site database, and a valid user, etc.
+        """
         if isinstance(bot, discord.User):
             pass
         elif isinstance(bot, str):
@@ -69,11 +77,16 @@ class BotNotesCog(commands.Cog):
 
         return bot
 
-    @commands.command(name="add-note", aliases=["addnote", "insertnote"], usage="add-note <bot> <note>")
+    @commands.command(name="add-note", aliases=["addnote", "insertnote"], usage="add-note <bot> <note>",
+                      description="Allows moderators to add a note to a bot in the site database, useful for recording "
+                                  "information that you or other moderators should take into account when testing, etc,"
+                                  " etc.")
     @commands.guild_only()
     @mod_check()
     async def add_note(self, ctx, bot: typing.Union[discord.User, str], *, note: str):
-
+        """
+        Allows moderators to add a note to a bot in the site database.
+        """
         bot = await self.check_bot(ctx, bot)
 
         bot_db = await ctx.bot.db.bots.find_one({
@@ -101,11 +114,13 @@ class BotNotesCog(commands.Cog):
                               f"note to {bot_db['name']}.")
 
     @commands.command(name="remove-note", aliases=["removenote", "delnote", "del-note", "delete-note", "deletenote"],
-                      usage="remove-note <bot> <note>")
+                      usage="remove-note <bot> <note>", description="Allows moderators to remove a note from a bot.")
     @commands.guild_only()
     @mod_check()
     async def remove_note(self, ctx, bot: typing.Union[discord.User, str], *, note: int):
-
+        """
+        Allows moderators to remove a note from a bot.
+        """
         bot = await self.check_bot(ctx, bot)
 
         bot_db = await ctx.bot.db.bots.find_one({
@@ -137,7 +152,9 @@ class BotNotesCog(commands.Cog):
     @commands.guild_only()
     @mod_check()
     async def notes(self, ctx, *, bot: typing.Union[discord.User, str]):
-
+        """
+        Allows moderators to view all of a bots notes.
+        """
         bot = await self.check_bot(ctx, bot)
 
         bot_db = await ctx.bot.db.bots.find_one({

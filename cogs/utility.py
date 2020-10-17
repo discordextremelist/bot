@@ -52,6 +52,7 @@ class UtilityCog(commands.Cog):
 
     # noinspection DuplicatedCode
     @commands.command(name="userinfo", aliases=["ui", "profile"], usage="userinfo <user>")
+    @commands.guild_only()
     async def user_info(self, ctx, *, user: discord.User = None):
         """
         Allows you to get your own or another user's DEL profile information.
@@ -113,6 +114,7 @@ class UtilityCog(commands.Cog):
 
     # noinspection DuplicatedCode
     @commands.command(name="botinfo", aliases=["bi"], usage="botinfo <bot>")
+    @commands.guild_only()
     async def robot_info(self, ctx, *, bot: discord.User):
         """
         Allows you to get information of a bot.
@@ -146,6 +148,7 @@ class UtilityCog(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="token", aliases=["delapitoken", "apikey", "apitoken"], usage="token <bot>")
+    @commands.guild_only()
     async def token(self, ctx, *, bot: discord.User):
         """
         Allows you to get the DELAPI token of the specified bot (provided you own it).
@@ -176,44 +179,8 @@ class UtilityCog(commands.Cog):
                     f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be the "
                     f"owner of the specified bot to access it's token.")
 
-    @commands.command(name="admintoken", usage="admintoken")
-    async def admin_token(self, ctx):
-        """
-        Allows you to get your temporary DELADMIN access token (admins only).
-        """
-        async with ctx.channel.typing():
-            db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
-
-            if not db_user:
-                raise NoSomething(ctx.author)
-
-            token: globalTypes.DelAdminToken = await self.bot.db.adminTokens.find_one({"_id": str(ctx.author.id)})
-
-            if token:
-                embed = discord.Embed(colour=await self.embed_colour(ctx))
-
-                embed.add_field(name=f"{self.bot.settings['emoji']['clock']} Valid From",
-                                value=datetime.datetime.utcfromtimestamp(token["lastUpdate"] / 1000).strftime(
-                                    f"%I:%M%p - %a, %d %b %Y (GMT)"))
-                embed.add_field(name=f"{self.bot.settings['emoji']['timer']} Valid Until",
-                                value=datetime.datetime.utcfromtimestamp(token["validUntil"] / 1000).strftime(
-                                    f"%I:%M%p - %a, %d %b %Y (GMT)"))
-                embed.add_field(name=f"{self.bot.settings['emoji']['cog']} Token", value=f"```{token['token']}```",
-                                inline=False)
-                embed.set_thumbnail(url=ctx.author.avatar_url)
-
-                try:
-                    await ctx.author.send(embed=embed)
-                    await ctx.send(
-                        f"{self.bot.settings['formats']['success']} Your current admin token has been dmed to you.")
-                except:
-                    await ctx.send("Your dms appear to be closed")
-            else:
-                await ctx.send(
-                    f"{self.bot.settings['formats']['noPerms']} **Invalid permission(s):** You need to be a "
-                    f"DEL admin to obtain one of these.")
-
     @commands.command(name="cssreset", aliases=["resetcss", "ohshitohfuck"])
+    @commands.guild_only()
     async def css_reset(self, ctx):
         """
         Allows you to reset your custom css if you've broken something
@@ -239,6 +206,7 @@ class UtilityCog(commands.Cog):
                     f"our website before to use this command.")
 
     @commands.command(name="showbots", aliases=["bl", "hasbots", "hasbot", "bots"], usage="showbots <user>")
+    @commands.guild_only()
     async def show_bots(self, ctx, *, user: discord.User = None):
         """
         Allows you to view the bots a specified user has.
@@ -273,6 +241,7 @@ class UtilityCog(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name="subscribe", aliases=["unsubscribe", "unsub", "sub"], usage="subscribe")
+    @commands.guild_only()
     async def subscribe(self, ctx):
         async with ctx.channel.typing():
             guild = self.bot.get_guild(int(self.bot.settings["guilds"]["main"]))
