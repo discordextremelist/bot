@@ -20,6 +20,8 @@ import time
 
 import discord
 from discord.ext import commands
+
+from cogs.types import botTypes
 from ext.checks import mod_check, NoSomething
 
 import traceback
@@ -89,7 +91,7 @@ class BotNotesCog(commands.Cog):
         """
         bot = await self.check_bot(ctx, bot)
 
-        bot_db = await ctx.bot.db.bots.find_one({
+        bot_db: botTypes.DelBot = await ctx.bot.db.bots.find_one({
             "_id": str(bot.id)
         })
 
@@ -123,7 +125,7 @@ class BotNotesCog(commands.Cog):
         """
         bot = await self.check_bot(ctx, bot)
 
-        bot_db = await ctx.bot.db.bots.find_one({
+        bot_db: botTypes.DelBot = await ctx.bot.db.bots.find_one({
             "_id": str(bot.id)
         })
 
@@ -157,7 +159,7 @@ class BotNotesCog(commands.Cog):
         """
         bot = await self.check_bot(ctx, bot)
 
-        bot_db = await ctx.bot.db.bots.find_one({
+        bot_db: botTypes.DelBot = await ctx.bot.db.bots.find_one({
             "_id": str(bot.id)
         })
 

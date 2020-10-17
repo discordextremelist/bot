@@ -20,6 +20,12 @@ from .globalTypes import DelOwner, DelImage
 from .discordTypes import DiscordUserFlags
 
 
+class DelBotReviewNote(TypedDict):
+    note: str
+    author: str
+    date: int
+
+
 class DelBotVotes(TypedDict):
     positive: List[str]
     negative: List[str]
@@ -73,6 +79,7 @@ class DelBot(TypedDict):
     shortDesc: str
     longDesc: str
     modNotes: str
+    reviewNotes: List[DelBotReviewNote]
     editors: List[str]
     owner: DelOwner
     avatar: DelImage
