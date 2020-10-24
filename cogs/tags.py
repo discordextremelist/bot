@@ -55,7 +55,6 @@ class TagsCog(commands.Cog, name="Tags"):
         """
         all_tags = self.bot.db.tags.find()
         async for tag in all_tags:
-            print(tag)
             if tag["_id"] == name.lower():
                 return [True, tag]
 
