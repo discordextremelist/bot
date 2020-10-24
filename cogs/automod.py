@@ -23,11 +23,11 @@ class Automod(commands.Cog):
     @commands.Cog.listener('on_message')
     async def on_automod(self, message):
 
-        # cache check goes here Cairo
+        # cache check goes here
         # if automod == 0:
         #     return
 
-        if message.guild is None or message.guild.id != 568567800910839811:  # in DM's or not DEL server
+        if message.guild is None or message.guild.id != 667065302260908032:  # in DM's or not DEL server
             return
 
         if message.author not in message.guild.members:  # They were banned but messages are still being sent cause discord
@@ -48,7 +48,7 @@ class Automod(commands.Cog):
     async def on_automod_edit(self, before, after):
         message = after
 
-        # cache check goes here Cairo
+        # cache check goes here
         # if automod == 0:
         #     return
 
@@ -80,7 +80,7 @@ class Automod(commands.Cog):
                 muterole = discord.utils.find(lambda r: r.name.lower() == "muted", message.guild.roles)
                 if muterole not in message.author.roles:
                     await message.author.add_roles(muterole, reason=reason)
-                    await message.channel.send(f"Muted **{message.author}** for {reason}")
+                    await message.channel.send(f"Muted **{message.author}** for potential spamming")
                     content_bucket.reset()
                     return await logchannel.send(embed=self.embed(message.author, reason, 1))
             except Exception as e:
@@ -94,7 +94,7 @@ class Automod(commands.Cog):
                 muterole = discord.utils.find(lambda r: r.name.lower() == "muted", message.guild.roles)
                 if muterole not in message.author.roles:
                     await message.author.add_roles(muterole, reason=reason)
-                    await message.channel.send(f"Muted **{message.author}** for {reason}")
+                    await message.channel.send(f"Muted **{message.author}** for potential spamming")
                     user_bucket.reset()
                     return await logchannel.send(embed=self.embed(message.author, reason, 1))
             except Exception as e:
@@ -120,7 +120,7 @@ class Automod(commands.Cog):
                         muterole = discord.utils.find(lambda r: r.name.lower() == "muted", message.guild.roles)
                         if muterole not in message.author.roles:
                             await message.author.add_roles(muterole, reason=reason)
-                            await message.channel.send(f"Muted **{message.author}** for {reason}")
+                            await message.channel.send(f"Muted **{message.author}** for potential advertising")
                             content_bucket.reset()
                             return await logchannel.send(embed=self.embed(message.author, reason, 1))
 
@@ -133,6 +133,19 @@ class Automod(commands.Cog):
         return e
 
     automodactions = [anti_spam, anti_invite]
+
+    @commands.command()
+    @commands.has_permissions(manage_guild=True)
+    @commands.bot_has_permissions(manage_messages=True)
+    async def toggleautomod(self, ctx):
+        check = # get value from cache
+
+        if check == 0:
+            # update cache
+            await ctx.send("Toggled automod `on`")
+        elif check != 0:
+            # update cache
+            await ctx.send("Toggled automod `off`")
 
 
 def setup(bot):
