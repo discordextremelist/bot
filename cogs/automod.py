@@ -27,7 +27,7 @@ class Automod(commands.Cog):
         # if automod == 0:
         #     return
 
-        if message.guild is None or message.guild.id != 667065302260908032:  # in DM's or not DEL server
+        if message.guild is None or message.guild.id != 568567800910839811:  # in DM's or not DEL server
             return
 
         if message.author not in message.guild.members:  # They were banned but messages are still being sent cause discord
