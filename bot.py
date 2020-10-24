@@ -41,6 +41,7 @@ botExtensions = [
     "cogs.help",
     "cogs.utility",
     "cogs.tickets",
+    "cogs.tags",
     "cogs.notes",
     "cogs.admin",
     "jishaku"
