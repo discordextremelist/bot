@@ -27,10 +27,11 @@ from io import BytesIO
 from .types import ticketTypes
 
 
-class TicketCog(commands.Cog):
+class TicketCog(commands.Cog, name="Tickets"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.help_icon = f"{self.bot.settings['emoji']['ticket']}"
         self.generator = snowflake.Generator()
         self.closed = 0xdd2e44
         self.awaiting_response = 0x77ff77
@@ -47,12 +48,16 @@ class TicketCog(commands.Cog):
             if not check_db:
                 return generated
 
-    @commands.command(name="open-ticket", aliases=["new-ticket", "nt", "ot", "request-changes", "rc", "create-ticket",
-                                                   "open", "create"])
+    @commands.command(name="open-ticket",
+                      aliases=["new-ticket", "nt", "ot", "request-changes", "rc", "create-ticket", "open", "create"],
+                      usage="open-ticket <bot>",
+                      description="Allows you to open a ticket with the specified bots' developer.")
     @commands.guild_only()
     @mod_check()
     async def open_ticket(self, ctx, bot: typing.Union[discord.User, str]):
-        
+        """
+        Allows you to open a ticket with the specified bots' developer.
+        """
         if isinstance(bot, discord.User):
             pass
         elif isinstance(bot, str):
@@ -60,9 +65,11 @@ class TicketCog(commands.Cog):
                 try:
                     bot = await ctx.bot.fetch_user(bot)
                 except Exception as e:
-                    return await ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```py\n{e}```")
+                    return await \
+                        ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```py\n{e}```")
             elif not bot.isdigit():
-                return await ctx.send(f"{self.bot.settings['formats']['error']} **Unknown bot:** We could not find a bot with the arguments you provided - Try using an ID so I can fetch it?")
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Unknown bot:** We could not find a "
+                                      f"bot with the arguments you provided - Try using an ID so I can fetch it?")
                                            
         if not bot.bot:
             return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid bot:** {bot} is not a bot.")
@@ -86,7 +93,8 @@ class TicketCog(commands.Cog):
             serverbots = ctx.guild.get_role(int(self.bot.settings['roles']['botpower']))
             
             if owner is None:
-                return await ctx.send(f"{self.bot.settings['formats']['error']} **Owner Missing:** The bot owner is not in the server!")
+                return await ctx.send(f"{self.bot.settings['formats']['error']} **Owner Missing:** The bot owner is "
+                                      f"not in the server!")
 
             overwrites = {
                 ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
@@ -149,10 +157,15 @@ class TicketCog(commands.Cog):
         except Exception as e:
             return await ctx.send(f"{self.bot.settings['formats']['error']} **An error occurred:**\n```{e}```")
 
-    @commands.command(name="awaiting-fixes", aliases=["awaiting-changes", "af", "ac", "fixes", "changes"])
+    @commands.command(name="awaiting-fixes", aliases=["awaiting-changes", "af", "ac", "fixes", "changes"],
+                      usage="awaiting-fixes", description="Updates the current ticket channel's status to Awaiting "
+                                                          "Fixes.")
     @commands.guild_only()
     @mod_check()
     async def awaiting_fixes(self, ctx):
+        """
+        Updates the current ticket channel's status to Awaiting Fixes.
+        """
         await ctx.message.delete()
 
         status_check: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({
@@ -199,11 +212,14 @@ class TicketCog(commands.Cog):
             return await ctx.send(f"{self.bot.settings['formats']['error']} **Invalid channel:** This is not a valid "
                                   f"ticket channel.")
 
-    @commands.command(name="close-ticket", aliases=["ct", "close"])
+    @commands.command(name="close-ticket", aliases=["ct", "close"], usage="close-ticket",
+                      description="Closes the ticket whose ticket channel you run it in.")
     @commands.guild_only()
     @mod_check()
     async def close_ticket(self, ctx, *, reason: str):
-
+        """
+        Closes the ticket whose ticket channel you run it in.
+        """
         try:
             message_id: ticketTypes.DelTicket = await self.bot.db.tickets.find_one({
                 "ids.channel": str(ctx.channel.id)

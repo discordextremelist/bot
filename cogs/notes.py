@@ -36,10 +36,11 @@ def check_s_end(string):
         return False
 
 
-class BotNotesCog(commands.Cog):
+class BotNotesCog(commands.Cog, name="Notes"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.help_icon = f"{self.bot.settings['emoji']['notepad']}"
 
     async def embed_colour(self, ctx):
         """
@@ -80,9 +81,7 @@ class BotNotesCog(commands.Cog):
         return bot
 
     @commands.command(name="add-note", aliases=["addnote", "insertnote"], usage="add-note <bot> <note>",
-                      description="Allows moderators to add a note to a bot in the site database, useful for recording "
-                                  "information that you or other moderators should take into account when testing, etc,"
-                                  " etc.")
+                      description="Allows moderators to add a note to a bot in the site database.")
     @commands.guild_only()
     @mod_check()
     async def add_note(self, ctx, bot: typing.Union[discord.User, str], *, note: str):
@@ -150,7 +149,7 @@ class BotNotesCog(commands.Cog):
             f"{self.bot.settings['formats']['success']} **Success:** I have successfully removed note #{note} "
             f"from {bot_db['name']}.")
 
-    @commands.command(name="notes", usage="notes <bot>")
+    @commands.command(name="notes", usage="notes <bot>", description="Allows moderators to view all of a bots notes.")
     @commands.guild_only()
     @mod_check()
     async def notes(self, ctx, *, bot: typing.Union[discord.User, str]):

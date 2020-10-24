@@ -24,15 +24,17 @@ from ext.checks import NoSomething
 from .types import userTypes, globalTypes
 
 
-class AdminCog(commands.Cog):
+class AdminCog(commands.Cog, name="Admin"):
 
     def __init__(self, bot):
         self.bot = bot
+        self.help_icon = f"{self.bot.settings['emoji']['coder']}"
 
-    @commands.command(name="admintoken", usage="admintoken")
+    @commands.command(name="admintoken", usage="admintoken",
+                      description="Allows you to get your temporary DELADMIN access token.")
     async def admin_token(self, ctx):
         """
-        Allows you to get your temporary DELADMIN access token (admins only).
+        Allows you to get your temporary DELADMIN access token.
         """
         async with ctx.channel.typing():
             db_user: userTypes.DelUser = await self.bot.db.users.find_one({"_id": str(ctx.author.id)})
