@@ -35,6 +35,9 @@ class Automod(commands.Cog):
 
         if message.author not in message.guild.members:  # They were banned but messages are still being sent cause discord
             return
+        
+        if message.author.bot:
+            return
 
         if message.author.guild_permissions.manage_messages:  # Member has MANAGE_MESSAGES permissions
             return
@@ -59,6 +62,9 @@ class Automod(commands.Cog):
             return
 
         if message.author not in message.guild.members:  # They were banned but messages are still being sent cause discord
+            return
+        
+        if message.author.bot:
             return
 
         if message.author.guild_permissions.manage_messages:  # Member has MANAGE_MESSAGES permissions
