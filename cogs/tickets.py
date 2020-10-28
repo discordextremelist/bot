@@ -121,7 +121,7 @@ class TicketCog(commands.Cog, name="Tickets"):
 
             await message.pin()
             await ctx.send(f"{self.bot.settings['formats']['success']} **Ticket created:** Successfully created "
-                           f"ticket - <#{channel.id}>")
+                           f"ticket - <#{channel.id}>.")
 
             embed2 = discord.Embed(color=self.awaiting_response)
 
