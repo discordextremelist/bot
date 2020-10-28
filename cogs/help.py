@@ -134,7 +134,7 @@ class HelpCommand(commands.HelpCommand):
                             f"`@{str(self.context.bot.user)}`."
 
         for extension in self.context.bot.cogs.values():
-            if extension.qualified_name in self.ignore_cogs:
+            if extension.qualified_name in self.ignore_cogs or extension.qualified_name == "Jishaku":
                 continue
 
             db_user: userTypes.DelUser = await self.context.bot.db.users.find_one({"_id": str(self.context.author.id)})
