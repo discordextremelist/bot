@@ -38,7 +38,7 @@ class HelpCommand(commands.HelpCommand):
         self.verify_checks = True
 
         self.mod_cogs = ["Tickets", "Notes"]
-        self.admin_cogs = ["Admin"]
+        self.admin_cogs = ["Admin", "Jishaku"]
         self.jishaku_under_cog = "Admin"
         self.ignore_cogs = ["Events"]
 
@@ -137,20 +137,44 @@ class HelpCommand(commands.HelpCommand):
             if extension.qualified_name in self.ignore_cogs:
                 continue
 
-            if extension.qualified_name == "Jishaku":
-                continue
-
             db_user: userTypes.DelUser = await self.context.bot.db.users.find_one({"_id": str(self.context.author.id)})
 
             if db_user:
                 if extension.qualified_name in self.mod_cogs and not db_user["rank"]["mod"]:
                     continue
+
+                if extension.qualified_name in self.admin_cogs and not db_user["rank"]["admin"]:
+                    continue
             else:
-                if extension.qualified_name in self.mod_cogs:
+                if extension.qualified_name in self.mod_cogs or extension.qualified_name in self.admin_cogs:
                     continue
 
-            extension_commands = \
-                f"`" + f"`, `".join([c.qualified_name for c in set(extension.get_commands()) if not c.hidden]) + '`'
+            extension_commands = ""
+
+            for command in set(extension.get_commands()):
+                if not command.hidden:
+                    mod = False
+                    for check in command.checks:
+                        if check.__qualname__.startswith("mod_check"):
+                            mod = True
+
+                    if mod and db_user:
+                        if db_user["rank"]["mod"]:
+                            if len(extension_commands) == 0:
+                                extension_commands += f"`{command.qualified_name}`"
+                            else:
+                                extension_commands += f", `{command.qualified_name}`"
+                        else:
+                            continue
+                    elif mod and not db_user:
+                        continue
+                    else:
+                        if len(extension_commands) == 0:
+                            extension_commands += f"`{command.qualified_name}`"
+                        else:
+                            extension_commands += f", `{command.qualified_name}`"
+                else:
+                    continue
 
             if extension.qualified_name == self.jishaku_under_cog:
                 jsk_extension = self.context.bot.get_cog("Jishaku")
@@ -222,16 +246,22 @@ class HelpCommand(commands.HelpCommand):
                 return await self.send_error_message(self.command_not_found(group.name))
 
             if group.cog_name in self.mod_cogs and not db_user["rank"]["mod"]:
-                return await self.send_error_message(self.command_not_found(group.name))
+                return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                       f"permission(s):** The specified command requires you to have "
+                                                       f"Moderator permissions to access.")
 
             if self.context.bot.settings["ownership"]["multiple"]:
                 if group.cog_name in self.admin_cogs and self.context.author.id not in \
-                        self.bot.settings["ownership"]["owners"]:
-                    return await self.send_error_message(self.command_not_found(group.name))
+                        self.bot.settings["ownership"]["owners"] and not db_user["rank"]["admin"]:
+                    return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                           f"permission(s):** The specified command requires you to "
+                                                           f"have Administrator permissions to access.")
             else:
                 if group.cog_name in self.admin_cogs and self.context.author.id != \
-                        self.bot.settings["ownership"]["owner"]:
-                    return await self.send_error_message(self.command_not_found(group.name))
+                        self.bot.settings["ownership"]["owner"] and not db_user["rank"]["admin"]:
+                    return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                           f"permission(s):** The specified command requires you to "
+                                                           f"have Administrator permissions to access.")
 
             if group.hidden:
                 return await self.send_error_message(self.command_not_found(group.name))
@@ -282,19 +312,25 @@ class HelpCommand(commands.HelpCommand):
 
         if db_user:
             if cog.qualified_name in self.ignore_cogs:
-                return await self.send_error_message(self.command_not_found(cog.name))
+                return await self.send_error_message(self.command_not_found(cog.qualified_name))
 
             if cog.qualified_name in self.mod_cogs and not db_user["rank"]["mod"]:
-                return await self.send_error_message(self.command_not_found(cog.name))
+                return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                       f"permission(s):** The specified cog requires you to have "
+                                                       f"Moderator permissions to access.")
 
             if self.context.bot.settings["ownership"]["multiple"]:
                 if cog.qualified_name in self.admin_cogs and self.context.author.id not in \
-                        self.bot.settings["ownership"]["owners"]:
-                    return await self.send_error_message(self.command_not_found(cog.name))
+                        self.bot.settings["ownership"]["owners"] and not db_user["rank"]["admin"]:
+                    return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                           f"permission(s):** The specified cog requires you to have "
+                                                           f"Administrator permissions to access.")
             else:
                 if cog.qualified_name in self.admin_cogs and self.context.author.id != \
-                        self.bot.settings["ownership"]["owner"]:
-                    return await self.send_error_message(self.command_not_found(cog.name))
+                        self.bot.settings["ownership"]["owner"] and not db_user["rank"]["admin"]:
+                    return await self.context.channel.send(f"{self.bot.settings['formats']['noPerms']} **Invalid "
+                                                           f"permission(s):** The specified cog requires you to have "
+                                                           f"Administrator permissions to access.")
         else:
             pass
 
