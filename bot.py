@@ -56,13 +56,14 @@ async def get_prefix(bot, message):
         prefixes = settings["prefix"]
         return commands.when_mentioned_or(*prefixes)(bot, message)
 
-
+intents = discord.Intents(guilds=True, members=True, messages=True, reactions=True)
+    
 if settings["ownership"]["multiple"]:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_ids=settings["ownership"]["owners"],
-                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
+                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False), intents=intents)
 else:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"],
-                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False))
+                       allowed_mentions=discord.AllowedMentions(roles=False, users=False, everyone=False), intents=intents)
 
 bot.db = db
 bot.remove_command("help")
