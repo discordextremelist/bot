@@ -342,8 +342,11 @@ class TagsCog(commands.Cog, name="Tags"):
         async for tag in all_tags:
             tags += "`" + tag["_id"] + f"`, "
 
-        await ctx.send(f"{self.bot.settings['formats']['info']} **Tags:** A full list of tags is available below:"
-                       f"\n\n{tags[:-2]}")
+        if len(tags) > 0:
+            await ctx.send(f"{self.bot.settings['formats']['info']} **Tags:** A full list of tags is available below:"
+                           f"\n\n{tags[:-2]}")
+        else:
+            await ctx.send(f"{self.bot.settings['formats']['info']} **Tags:** There are no saved tags.")
 
     @commands.command(name="raw-tag", usage="raw-tag <name/alias>", aliases=["tag-raw", "txt-tag"],
                       description="Allows moderators to get the content of a specific language of a tag in a raw file.")
