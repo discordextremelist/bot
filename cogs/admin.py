@@ -29,6 +29,17 @@ class AdminCog(commands.Cog, name="Admin"):
     def __init__(self, bot):
         self.bot = bot
         self.help_icon = f"{self.bot.settings['emoji']['coder']}"
+    
+    async def embed_colour(self, ctx):
+        global colour
+
+        bot_guild_member = await ctx.guild.fetch_member(ctx.bot.user.id)
+        if len(str(bot_guild_member.colour.value)) == 1:
+            colour = 0xFFFFFA
+        else:
+            colour = bot_guild_member.colour.value
+
+        return colour
 
     @commands.command(name="admintoken", usage="admintoken",
                       description="Allows you to get your temporary DELADMIN access token.")
