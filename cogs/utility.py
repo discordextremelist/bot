@@ -69,7 +69,7 @@ class UtilityCog(commands.Cog, name="Utility"):
         if not db_user:
             raise NoSomething(user)
 
-        embed = discord.Embed(colour=await self.embed_colour(ctx))
+        embed = discord.Embed(colour=user.color) # Make it so that it shows the color of the role as the embed color, though its mostly gonna be pink
 
         acknowledgements = []
         badges = []
@@ -104,7 +104,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 
         embed.add_field(name=f"{self.bot.settings['emoji']['shadows']} Username", value=f"{db_user['fullUsername']}"
                                                                                         f" {' '.join(badges)}")
-        embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"])
+        # embed.add_field(name=f"{self.bot.settings['emoji']['id']} ID", value=db_user["_id"]) # You can change this idc
+        embed.set_footer(text=f"ID: db_user["_id"]")
 
         if acknowledgements != []:
             embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Acknowledgements",
