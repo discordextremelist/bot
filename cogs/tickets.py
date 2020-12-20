@@ -18,6 +18,7 @@
 import discord
 from discord.ext import commands
 from ext.checks import mod_check
+from datetime import datetime
 
 import traceback
 import snowflake
@@ -109,7 +110,8 @@ class TicketCog(commands.Cog, name="Tickets"):
 
             embed = discord.Embed(colour=self.awaiting_response,
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
-                                              "the message(s) the staff member has sent below.")
+                                              "the message(s) the staff member has sent below.",
+                                  timestamp=datetime.utcnow())
 
             embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
                              icon_url=self.bot.settings["images"]["awaiting_response"])
