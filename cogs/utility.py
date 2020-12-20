@@ -69,7 +69,10 @@ class UtilityCog(commands.Cog, name="Utility"):
         if not db_user:
             raise NoSomething(user)
 
-        embed = discord.Embed(colour=await self.embed_colour(ctx))
+        statuses = {'online': discord.Color.green(), 'dnd': discord.Color.red(), 'idle': discord.Color.gold(),
+                    'offline': discord.Color.dark_grey()}
+
+        embed = discord.Embed(colour=statuses[str(user.status)])
 
         acknowledgements = []
         badges = []
