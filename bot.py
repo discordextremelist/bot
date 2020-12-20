@@ -164,7 +164,7 @@ async def on_command_error(ctx, error):
                                       f"to be a Moderator to execute this command.")
 
     if isinstance(error, NoSomething):
-        return await ctx.channel.send(error.message)
+        return await ctx.channel.send(settings['formats']['error'] + error.message)
 
     if isinstance(error, commands.MissingRequiredArgument):
         return await ctx.send(f"{settings['formats']['error']} **Missing arguments:** Argument `{error.param.name}` "
