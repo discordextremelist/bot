@@ -50,8 +50,6 @@ class UtilityCog(commands.Cog, name="Utility"):
         before = monotonic()
         await ctx.trigger_typing()
         ping = (monotonic() - before) * 1000
-        # you gotta have the ping pong paddle
-        await ctx.message.add_reaction('🏓')
         await ctx.send(f"{self.bot.settings['emoji']['ping']} | **Pong! My ping is:** `{int(ping)}ms`")
 
     # noinspection DuplicatedCode
