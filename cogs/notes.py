@@ -24,9 +24,7 @@ from discord.ext import commands
 from cogs.types import botTypes
 from ext.checks import mod_check, NoSomething
 
-import traceback
 import typing
-from io import BytesIO
 
 
 def check_s_end(string):

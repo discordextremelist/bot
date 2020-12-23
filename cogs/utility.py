@@ -19,9 +19,8 @@ import discord
 from discord.ext import commands
 from ext.checks import *
 
-import datetime
 from time import monotonic
-from .types import globalTypes, botTypes, userTypes
+from .types import botTypes, userTypes
 
 
 class UtilityCog(commands.Cog, name="Utility"):
