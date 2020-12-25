@@ -8,7 +8,7 @@ discord.py==1.5.1
 humanfriendly==4.7
 idna==2.10
 motor==2.3.0
-multidict==4.7.6
+multidict==5.1.0
 pymongo==3.11.2
 pyreadline==2.1
 snowflake.py==1.0.0

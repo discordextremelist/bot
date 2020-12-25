@@ -140,7 +140,8 @@ class UtilityCog(commands.Cog, name="Utility"):
         embed.add_field(name=f"{self.bot.settings['emoji']['crown']} Developer",
                         value=f"[{bot_owner['fullUsername']}]({self.bot.settings['website']['url']}/users/{bot_owner['_id']})")
         embed.add_field(name=f"{self.bot.settings['emoji']['infoBook']} Library", value=db_bot["library"])
-        embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Prefix", value=db_bot["prefix"])
+        if db_bot["prefix"]:
+            embed.add_field(name=f"{self.bot.settings['emoji']['speech']} Prefix", value=db_bot["prefix"])
         embed.add_field(name=f"{self.bot.settings['emoji']['shield']} Server Count",
                         value=str(db_bot["serverCount"]))
         embed.add_field(name=f"{self.bot.settings['emoji']['url']} Listing URL",
