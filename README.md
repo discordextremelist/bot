@@ -1,4 +1,6 @@
 # DEL Bot for DEL Website v5.x.x
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdiscordextremelist%2Fbot.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdiscordextremelist%2Fbot?ref=badge_shield)
+
 
 Licensing information viewable in LICENSE.md
 
@@ -33,3 +35,7 @@ Run the `python bot.py` command, please note python may be python3 on some platf
 ### With PM2
 
 Run the `pm2 start bot.py --name DEL-BOT` command.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdiscordextremelist%2Fbot.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdiscordextremelist%2Fbot?ref=badge_large)
