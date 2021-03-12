@@ -34,8 +34,12 @@ class EditingContext(commands.Context):
             pass
         if reply:
             return await reply.edit(content=content, embed=embed, delete_after=delete_after)
-        msg = await super().send(content=content, tts=tts, embed=embed, file=file, files=files,
-                                 delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
+        reference = self.message.reference
+        if reference and isinstance(reference.resolved, discord.Message):
+            msg = await reference.resolved.reply(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
+        else:
+            msg = await super().send(content=content, tts=tts, embed=embed, file=file, files=files,
+                                     delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
         self.bot.cmd_edits[self.message.id] = msg
         return msg
 
