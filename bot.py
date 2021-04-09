@@ -205,7 +205,7 @@ async def on_message(msg):
                 await message.edit(embed=embed)
 
                 await ctx.send(f"{bot.settings['formats']['ticketStatus']} **Ticket update:** Changed ticket "
-                               f"status to `Dev Replied`.")
+                               f"status to `Dev Replied`.", mention_author=False)
 
                 ticket = await bot.db.tickets.find_one({
                     "ids.message": str(message.id)
