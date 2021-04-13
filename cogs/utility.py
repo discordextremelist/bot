@@ -146,7 +146,7 @@ class UtilityCog(commands.Cog, name="Utility"):
                         value=str(db_bot["serverCount"]))
         embed.add_field(name=f"{self.bot.settings['emoji']['url']} Listing URL",
                         value=f"{self.bot.settings['website']['url']}/bots/{db_bot['_id']}", inline=False)
-        embed.set_thumbnail(url=f"{db_bot['avatar']['url']}")
+        embed.set_thumbnail(url=bot.avatar_url)
 
         await ctx.send(embed=embed)
 
