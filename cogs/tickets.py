@@ -110,7 +110,8 @@ class TicketCog(commands.Cog, name="Tickets"):
 
             embed = discord.Embed(colour=self.awaiting_response,
                                   description="Hello, whilst reviewing your bot we found some issues, please refer to "
-                                              "the message(s) the staff member has sent below.",
+                                              "the message(s) the staff member has sent below. Please do not ping staff members "
+                                              "when replying.",
                                   timestamp=datetime.utcnow())
 
             embed.set_author(name=f"Approval Feedback - {ticket_id} [AWAITING RESPONSE]",
