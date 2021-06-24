@@ -31,8 +31,6 @@ class AdminCog(commands.Cog, name="Admin"):
         self.help_icon = f"{self.bot.settings['emoji']['coder']}"
     
     async def embed_colour(self, ctx):
-        global colour
-
         bot_guild_member = await ctx.guild.fetch_member(ctx.bot.user.id)
         if len(str(bot_guild_member.colour.value)) == 1:
             colour = 0xFFFFFA

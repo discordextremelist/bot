@@ -24,10 +24,10 @@ class EditingContext(commands.Context):
         super().__init__(*args, **kwargs)
 
     async def send(self, content=None, *, tts=False, embed=None, file=None, files=None, delete_after=None, nonce=None,
-                   allowed_mentions=None):
+                   allowed_mentions=None, mention_author=None):
         if file or files:
             return await super().send(content=content, tts=tts, embed=embed, file=file, files=files,
-                                      delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
+                                      delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions, mention_author=mention_author)
         reply = None
         try:
             reply = self.bot.cmd_edits[self.message.id]
@@ -37,12 +37,11 @@ class EditingContext(commands.Context):
             return await reply.edit(content=content, embed=embed, delete_after=delete_after)
         reference = self.message.reference
         if reference and isinstance(reference.resolved, discord.Message):
-            msg = await reference.resolved.reply(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
+            msg = await reference.resolved.reply(content=content, tts=tts, embed=embed, file=file, files=files, delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions,
+                                                 mention_author=mention_author)
         else:
             msg = await super().send(content=content, tts=tts, embed=embed, file=file, files=files,
-                                     delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions)
+                                     delete_after=delete_after, nonce=nonce, allowed_mentions=allowed_mentions,
+                                     mention_author=mention_author)
         self.bot.cmd_edits[self.message.id] = msg
         return msg
-
-
-

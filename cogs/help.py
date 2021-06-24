@@ -50,7 +50,6 @@ class HelpCommand(commands.HelpCommand):
         })
 
     async def embed_colour(self, ctx):
-        global colour
 
         bot_guild_member = await ctx.guild.fetch_member(ctx.bot.user.id)
         if len(str(bot_guild_member.colour.value)) == 1:

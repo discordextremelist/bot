@@ -15,14 +15,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import datetime
 import json
 import logging
 
 import colouredlogs
 import discord
 from discord.ext import commands
+from discord_slash import SlashCommand, SlashContext
 from motor.motor_asyncio import AsyncIOMotorClient
+from datetime import datetime, timedelta
 
 from ext.checks import NoMod, NoSomething
 from ext.context import EditingContext
@@ -44,6 +45,7 @@ botExtensions = [
     "cogs.tags",
     "cogs.notes",
     "cogs.admin",
+    "cogs.moderation",
     "jishaku"
 ]
 
@@ -56,6 +58,7 @@ async def get_prefix(bot, message):
         prefixes = settings["prefix"]
         return commands.when_mentioned_or(*prefixes)(bot, message)
 
+
 intents = discord.Intents(guilds=True, members=True, messages=True, reactions=True)
 allowed_mentions = discord.AllowedMentions(roles=False, users=False, everyone=False)
 
@@ -65,6 +68,8 @@ if settings["ownership"]["multiple"]:
 else:
     bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, owner_id=settings["ownership"]["owner"],
                        allowed_mentions=allowed_mentions, intents=intents)
+
+slash = SlashCommand(bot, sync_commands=True, sync_on_cog_reload=True)
 
 bot.db = db
 bot.remove_command("help")
@@ -86,7 +91,7 @@ async def on_ready():
     game = discord.Game(name="discordextremelist.xyz", type=discord.ActivityType.watching)
     await bot.change_presence(status=discord.Status.online, activity=game)
     if not hasattr(bot, "uptime"):
-        bot.uptime = datetime.datetime.utcnow()
+        bot.uptime = datetime.utcnow()
 
 
 @bot.event
@@ -131,7 +136,7 @@ async def on_member_join(member):
     if member.bot:
         db_bot = await db.bots.find_one({"_id": str(member.id)})
 
-        if str(member.guild.id) == settings["guilds"]["main"]:
+        if str(member.guild.id) == '667065302260908032':
             if db_bot:
                 if db_bot["status"]["premium"]:
                     await member.add_roles(discord.Object(id=int(settings["roles"]["premiumBot"])),
@@ -139,6 +144,11 @@ async def on_member_join(member):
                 else:
                     await member.add_roles(discord.Object(id=int(settings["roles"]["bot"])),
                                            reason="Bot is Approved on the website.")
+
+                # Limitting the value to 2 chars to make it easier
+                if db_bot["prefix"] and db_bot["prefix"][:2] in ['! ', '- ', '. ', '? ', '* ', '$ ', '% ']:
+                    await member.add_roles(discord.Object(id=int(settings["roles"]["commonPrefix"])),
+                                           reason=f"Bot has a common prefix {db_bot['prefix']}")
             else:
                 await member.add_roles(discord.Object(id=int(settings["roles"]["unlisted"])),
                                        reason="Bot is not listed on the website.")
@@ -163,18 +173,47 @@ async def on_command_error(ctx, error):
         return await ctx.channel.send(f"{settings['formats']['noPerms']} **Invalid permission(s):** You need "
                                       f"to be a Moderator to execute this command.")
 
-    if isinstance(error, NoSomething):
+    elif isinstance(error, NoSomething):
         return await ctx.channel.send(settings['formats']['error'] + error.message)
 
-    if isinstance(error, commands.MissingRequiredArgument):
+    elif isinstance(error, commands.MissingRequiredArgument):
         return await ctx.send(f"{settings['formats']['error']} **Missing arguments:** Argument `{error.param.name}` "
                               f"is required.")
 
-    if isinstance(error, commands.CheckFailure) and error.args:
+    elif isinstance(error, commands.CheckFailure) and error.args:
         return await ctx.channel.send(error)
 
-    if isinstance(error, commands.CommandError) and error.args:
+    elif isinstance(error, commands.CommandError) and error.args:
         return await ctx.channel.send(error)
+
+    elif isinstance(error, commands.BadArgument):
+        return await ctx.channel.send(error)
+
+    await ctx.send(error)
+    logging.exception("something done fucked up", exc_info=error)
+
+
+@bot.event
+async def on_slash_command_error(ctx: SlashContext, error):
+    if isinstance(error, NoMod):
+        return await ctx.send(f"{settings['formats']['noPerms']} **Invalid permission(s):** You need "
+                              f"to be a Moderator to execute this command.")
+
+    elif isinstance(error, NoSomething):
+        return await ctx.send(settings['formats']['error'] + error.message)
+
+    elif isinstance(error, commands.MissingRequiredArgument):
+        return await ctx.send(f"{settings['formats']['error']} **Missing arguments:** Argument `{error.param.name}` "
+                              f"is required.")
+
+    elif isinstance(error, commands.CheckFailure) and error.args:
+        return await ctx.send(error)
+
+    elif isinstance(error, commands.CommandError) and error.args:
+        return await ctx.send(error)
+
+    elif isinstance(error, commands.BadArgument):
+        return await ctx.send(error)
 
     logging.exception("something done fucked up", exc_info=error)
 
@@ -188,6 +227,21 @@ async def on_message(msg):
         ticket = await bot.db.tickets.find_one({
             "ids.channel": str(ctx.channel.id)
         })
+
+        if ticket and msg.mentions:
+            mod_role = msg.guild.get_role(int(bot.settings['roles']['mod']))
+            count = 0  # So it wouldn't send a message twice or more if multiple are pinged
+            for member in msg.mentions:
+                if mod_role in member.roles:
+                    if count >= 1:
+                        break
+                    await ctx.channel.send("**Don't ping staff members in approval tickets**\n"
+                                           "  Please do not ping our staff members in approval tickets, "
+                                           "our staff members have responsibilities outside of Discord "
+                                           "therefore we may not be able to respond instantly. However, "
+                                           "rest assured, we will respond whenever we get the chance to."
+                                           "\n\nhttps://yeet.ovh/ping.gif")
+                    count += 1
 
         if ticket and ticket["status"] == 0:
             bot_db = await ctx.bot.db.bots.find_one({

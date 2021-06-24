@@ -44,7 +44,6 @@ class BotNotesCog(commands.Cog, name="Notes"):
         """
         Gets the bots display colour and returns a colour code able to be used on embeds.
         """
-        global colour
 
         bot_guild_member = await ctx.guild.fetch_member(self.bot.user.id)
         if len(str(bot_guild_member.colour.value)) == 1:
@@ -173,10 +172,9 @@ class BotNotesCog(commands.Cog, name="Notes"):
             title = f"{bot_db['name']}'s Notes"
 
         embed = discord.Embed(title=title, colour=await self.embed_colour(ctx))
-        embed.set_thumbnail(url=bot_db["avatar"]["url"])
-        pos = 1
+        embed.set_thumbnail(url=bot.avatar_url)
 
-        for note in bot_db["reviewNotes"]:
+        for pos, note in enumerate(bot_db["reviewNotes"], start=1):
             try:
                 user = str(await self.bot.fetch_user(note["author"]))
             except discord.NotFound:
@@ -185,7 +183,6 @@ class BotNotesCog(commands.Cog, name="Notes"):
             date = datetime.datetime.utcfromtimestamp(note["date"] / 1000).strftime(f"%I:%M%p - %a, %d %b %Y (GMT)")
             embed.add_field(name=f"Note #{pos}", value=f"-> **{discord.utils.escape_markdown(user, as_needed=False)} "
                                                        f"- {date}**\n" + note["note"], inline=False)
-            pos += 1
 
         await ctx.send(embed=embed)
 

@@ -5,9 +5,10 @@ from discord.ext import commands
 from datetime import datetime, timezone
 
 # this regex is probably trash but at least it works
-INVITE = re.compile(r"(?:https?://)?discord(?:\.com/invite|app\.com/invite|\.gg)/(?:discord(?:\-api|\-developers|\-testers)|[a-zA-Z0-9])+/?")
+INVITE = re.compile(r"discord(?:\.com/invite|app\.com/invite|\.gg)/?([a-zA-Z0-9\-]{2,32})")
 
 
+# noinspection PyMethodParameters,PyRedundantParentheses
 class CooldownByContent(commands.CooldownMapping):
     def _bucket_key(ctx, message):
         return (message.channel.id, message.content)
@@ -33,7 +34,8 @@ class Automod(commands.Cog):
         if message.guild is None or message.guild.id != 568567800910839811:  # in DM's or not DEL server
             return
 
-        if message.author not in message.guild.members:  # They were banned but messages are still being sent cause discord
+        # They were banned but messages are still being sent cause discord is stupid or bot is slow
+        if message.author not in message.guild.members:
             return
 
         if message.author.guild_permissions.manage_messages:  # Member has MANAGE_MESSAGES permissions

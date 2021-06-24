@@ -38,7 +38,6 @@ class TagsCog(commands.Cog, name="Tags"):
         """
         Gets the bots display colour and returns a colour code able to be used on embeds.
         """
-        global colour
 
         bot_guild_member = await ctx.guild.fetch_member(self.bot.user.id)
         if len(str(bot_guild_member.colour.value)) == 1:
@@ -394,20 +393,20 @@ class TagsCog(commands.Cog, name="Tags"):
                         await language_picker.clear_reactions()
 
                         locale = ""
-                        if str(reaction) == self.bot.settings["emoji"]["flags"]["britian"]:
+                        if str(reaction) == languages_dict["britian"]:
                             locale = "en"
-                        elif str(reaction) == self.bot.settings["emoji"]["flags"]["turkey"]:
+                        elif str(reaction) == languages_dict["turkey"]:
                             locale = "tr"
-                        elif str(reaction) == self.bot.settings["emoji"]["flags"]["france"]:
+                        elif str(reaction) == languages_dict["france"]:
                             locale = "fr"
-                        elif str(reaction) == self.bot.settings["emoji"]["flags"]["portugal"]:
+                        elif str(reaction) == languages_dict["portugal"]:
                             locale = "pt"
-                        elif str(reaction) == self.bot.settings["emoji"]["flags"]["spain"]:
+                        elif str(reaction) == languages_dict["spain"]:
                             locale = "es"
 
-                        raw_tag = discord.File(BytesIO((str(tag[1]["contents"][locale])).encode("utf-8")),
-                                               filename=f"{tag[1]['_id']}-{time.time()}.txt")
-                        return await ctx.send(file=raw_tag)
+                            raw_tag = discord.File(BytesIO((str(tag[1]["contents"][locale])).encode("utf-8")),
+                                                   filename=f"{tag[1]['_id']}-{time.time()}.txt")
+                            return await ctx.send(file=raw_tag)
 
             except asyncio.TimeoutError:
                 return

@@ -14,10 +14,10 @@ class NoSomething(commands.CommandError):
     def __init__(self, account: discord.User):
         self.user = account
         if account.bot:
-            fmt = f"**Invalid bot:** I could not find {account} in my " \
+            fmt = f" **Invalid bot:** I could not find {account} in my " \
                   "database."
         else:
-            fmt = f"**Invalid user:** I could not find {account} in my " \
+            fmt = f" **Invalid user:** I could not find {account} in my " \
                   "database."
 
         self.message = fmt

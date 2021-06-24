@@ -1,122 +1,123 @@
 {
-  "token": "",
-  "prefix": ["del,"],
-  "mongo": {
-    "uri": "mongodb://localhost:27017",
-    "db": "del"
-  },
-  "ownership": {
-    "multiple": true,
-    "owners": [0],
-    "owner": 0
-  },
-  "guilds": {
-    "main": "",
-    "staff": ""
-  },
-  "website": {
-    "url": "https://discordextremelist.xyz"
-  },
-  "roles": {
-    "unapprovedBot": "633141192497823784",
-    "bot": "568587927265869824",
-    "premiumBot": "568970918647300116",
-    "serverOwner": "623052263295942657",
-    "developer": "568572172151291929",
-    "staff": "568568238250917909",
-    "mod": "568568238250917909",
-    "admin": "568568341414019086",
-    "unlisted": "736732871708115024",
-    "fixesBot": "662230379326865429",
-    "botpower": "716174811629486141",
-    "subscribers": "703779239400570880"
-  },
-  "colours": {
-    "awaiting_fixes": "0xf73538",
-    "awaiting_response": "0x1cc1e6",
-    "closed": "0xe40707"
-  },
-  "channels": {
-    "ticketCategory": "736820335629828159",
-    "ticketLog": "736820647484981268",
-    "messageLog": "736823970334113862"
-  },
-  "images": {
-    "awaiting_fixes": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_fixes-1.png",
-    "awaiting_response": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_response-2.png",
-    "closed": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/closed-3.png",
-    "dev_replied": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/dev_replied-4.png"
-  },
-  "formats": {
-    "error": "<:error:621988943314812928> |",
-    "warn": "<:warning:599554018406039574> |",
-    "success": "<:check:587490138129563649> |",
-    "noPerms": "<:cross:587490138129432596> |",
-    "ticketStatus": "<:flag:736795389210001497> |",
-    "info": "<:info:645226250889068584> |"
-  },
-  "emoji": {
-    "flags": {
-      "britian": "<:britian:769505989183012884>",
-      "turkey": "<:turkey:769506407439138846>",
-      "france": "<:france:769506407518568458>",
-      "portugal": "<:portugal:769506407636140052>",
-      "spain": "<:spain:769506407438352424>"
+    "token": "",
+    "prefix": ["del,"],
+    "mongo": {
+        "uri": "mongodb://localhost:27017",
+        "db": "del"
     },
-    "check": "<:check:587490138129563649>",
-    "cross": "<:cross:587490138129432596>",
-    "home": "<:home:599501387516215326>",
-    "hammer": "<:hammer:599508413302439961>",
-    "toolbox": "<:toolbox:599508422823641118>",
-    "speech": "<:talking:599519046509133885>",
-    "warning": "<:warning:599554018406039574>",
-    "boot": "<:boot:599553995731763201>",
-    "bell": "<:bell:599554581466316800>",
-    "alarm": "<:alarm:599554591146639380>",
-    "crayon": "<:crayon:599555499377295390>",
-    "brush": "<:brush:599555488539213825>",
-    "serviceBell": "<:servicebell:599556134298189824>",
-    "calendar": "<:calendar:599556100206886924>",
-    "eject": "<:eject:599556110789115925>",
-    "crown": "<:crown:599557812259127297>",
-    "shadows": "<:shadows:599557820723101698>",
-    "places": "<:places:599557829862621204>",
-    "shield": "<:shield:599558630177767424>",
-    "filter": "<:filter:599558621067739136>",
-    "sound": "<:sound:599559909931221014>",
-    "ear": "<:ear:599559784244445186>",
-    "notepad": "<:notepad:599559758189559829>",
-    "bin": "<:bin:600126267999780885>",
-    "cog": "<:cog:667646832805150731>",
-    "infoBook": "<:verificationApp:589349182234558470>",
-    "id": "<:id:669089983986139136>",
-    "robot": "<:robot:669089983990333441>",
-    "entry": "<:entry:669089983507726371>",
-    "game": "<:game:669089983692537857>",
-    "online": "<:online:669089983570903040>",
-    "idle": "<:idle:669089983323439105>",
-    "dnd": "<:dnd:669089984002916352>",
-    "offline": "<:offline:669089983621234688>",
-    "smilie": "<:smilie:669103681639022592>",
-    "label": "<:label:669364669797892127>",
-    "phone": "<:phone:669466706565005312>",
-    "desktop": "<:desktop:669466706447695883>",
-    "coder": "<:coder:669739780824760330>",
-    "ping": "<:ping:668013200918446080>",
-    "minidisc": "<:minidisc:669745576048459779>",
-    "disc": "<:dvd:669745576124088371>",
-    "chart": "<:graph:669755531186929665>",
-    "womanboot": "<:womanboot:670553673390227456>",
-    "zipped": "<:zipped:670786074876051487>",
-    "unlock": "<:unlock:682475650371944454>",
-    "url": "<:globe:695565597173481493>",
-    "clock": "<:clock:726557245869129831>",
-    "timer": "<:timer:726557246171119716>",
-    "assistant": "<:webAssistant:664734569773269003>",
-    "heart": "<:heart:749527451948023820>",
-    "tube": "<:tube:749529449535635516>",
-    "ticket": "<:ticket:769354945056604171>",
-    "high_voltage": "<:high_voltage:769354944930381826>",
-    "info": "<:info:645226250889068584>"
-  }
+    "ownership": {
+        "multiple": true,
+        "owners": [0],
+        "owner": 0
+    },
+    "guilds": {
+        "main": "667065302260908032",
+        "staff": ""
+    },
+    "website": {
+        "url": "https://discordextremelist.xyz"
+    },
+    "roles": {
+        "commonPrefix": "733697042672648293",
+        "unapprovedBot": "633141192497823784",
+        "bot": "568587927265869824",
+        "premiumBot": "568970918647300116",
+        "serverOwner": "623052263295942657",
+        "developer": "568572172151291929",
+        "staff": "667079615449137172",
+        "mod": "667079615449137172",
+        "admin": "667079615449137172",
+        "unlisted": "736732871708115024",
+        "fixesBot": "662230379326865429",
+        "botpower": "716174811629486141",
+        "subscribers": "703779239400570880"
+    },
+    "colours": {
+        "awaiting_fixes": "0xf73538",
+        "awaiting_response": "0x1cc1e6",
+        "closed": "0xe40707"
+    },
+    "channels": {
+        "ticketCategory": "736820335629828159",
+        "ticketLog": "736820647484981268",
+        "messageLog": "736823970334113862"
+    },
+    "images": {
+        "awaiting_fixes": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_fixes-1.png",
+        "awaiting_response": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/awaiting_response-2.png",
+        "closed": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/closed-3.png",
+        "dev_replied": "https://raw.githubusercontent.com/discordextremelist/bot/master/assets/dev_replied-4.png"
+    },
+    "formats": {
+        "error": "<:error:621988943314812928> |",
+        "warn": "<:warning:599554018406039574> |",
+        "success": "<:check:587490138129563649> |",
+        "noPerms": "<:cross:587490138129432596> |",
+        "ticketStatus": "<:flag:736795389210001497> |",
+        "info": "<:info:645226250889068584> |"
+    },
+    "emoji": {
+        "flags": {
+            "britian": "<:britian:769505989183012884>",
+            "turkey": "<:turkey:769506407439138846>",
+            "france": "<:france:769506407518568458>",
+            "portugal": "<:portugal:769506407636140052>",
+            "spain": "<:spain:769506407438352424>"
+        },
+        "check": "<:check:587490138129563649>",
+        "cross": "<:cross:587490138129432596>",
+        "home": "<:home:599501387516215326>",
+        "hammer": "<:hammer:599508413302439961>",
+        "toolbox": "<:toolbox:599508422823641118>",
+        "speech": "<:talking:599519046509133885>",
+        "warning": "<:warning:599554018406039574>",
+        "boot": "<:boot:599553995731763201>",
+        "bell": "<:bell:599554581466316800>",
+        "alarm": "<:alarm:599554591146639380>",
+        "crayon": "<:crayon:599555499377295390>",
+        "brush": "<:brush:599555488539213825>",
+        "serviceBell": "<:servicebell:599556134298189824>",
+        "calendar": "<:calendar:599556100206886924>",
+        "eject": "<:eject:599556110789115925>",
+        "crown": "<:crown:599557812259127297>",
+        "shadows": "<:shadows:599557820723101698>",
+        "places": "<:places:599557829862621204>",
+        "shield": "<:shield:599558630177767424>",
+        "filter": "<:filter:599558621067739136>",
+        "sound": "<:sound:599559909931221014>",
+        "ear": "<:ear:599559784244445186>",
+        "notepad": "<:notepad:599559758189559829>",
+        "bin": "<:bin:600126267999780885>",
+        "cog": "<:cog:667646832805150731>",
+        "infoBook": "<:verificationApp:589349182234558470>",
+        "id": "<:id:669089983986139136>",
+        "robot": "<:robot:669089983990333441>",
+        "entry": "<:entry:669089983507726371>",
+        "game": "<:game:669089983692537857>",
+        "online": "<:online:669089983570903040>",
+        "idle": "<:idle:669089983323439105>",
+        "dnd": "<:dnd:669089984002916352>",
+        "offline": "<:offline:669089983621234688>",
+        "smilie": "<:smilie:669103681639022592>",
+        "label": "<:label:669364669797892127>",
+        "phone": "<:phone:669466706565005312>",
+        "desktop": "<:desktop:669466706447695883>",
+        "coder": "<:coder:669739780824760330>",
+        "ping": "<:ping:668013200918446080>",
+        "minidisc": "<:minidisc:669745576048459779>",
+        "disc": "<:dvd:669745576124088371>",
+        "chart": "<:graph:669755531186929665>",
+        "womanboot": "<:womanboot:670553673390227456>",
+        "zipped": "<:zipped:670786074876051487>",
+        "unlock": "<:unlock:682475650371944454>",
+        "url": "<:globe:695565597173481493>",
+        "clock": "<:clock:726557245869129831>",
+        "timer": "<:timer:726557246171119716>",
+        "assistant": "<:webAssistant:664734569773269003>",
+        "heart": "<:heart:749527451948023820>",
+        "tube": "<:tube:749529449535635516>",
+        "ticket": "<:ticket:769354945056604171>",
+        "high_voltage": "<:high_voltage:769354944930381826>",
+        "info": "<:info:645226250889068584>"
+    }
 }
