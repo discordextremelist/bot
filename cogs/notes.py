@@ -173,7 +173,7 @@ class BotNotesCog(commands.Cog, name="Notes"):
             title = f"{bot_db['name']}'s Notes"
 
         embed = discord.Embed(title=title, colour=await self.embed_colour(ctx))
-        embed.set_thumbnail(url=bot_db["avatar"]["url"])
+        embed.set_thumbnail(url=bot.avatar_url if not bot_db.get("avatar") else bot_db["avatar"]["url"])
         pos = 1
 
         for note in bot_db["reviewNotes"]:
