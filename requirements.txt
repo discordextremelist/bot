@@ -7,7 +7,7 @@ chardet==3.0.4
 colorama==0.4.4
 colouredlogs==10.0.1
 discord.py==1.6.0
-dnspython==2.0.0
+dnspython==2.6.1
 humanfriendly==4.7
 humanize==3.2.0
 idna==2.10
