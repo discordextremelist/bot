@@ -27,6 +27,6 @@ jobs:
                   mkdir ~/.kube
                   echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
             - name: Set image
-              run: kubectl set image deployment/bot site=ghcr.io/discordextremelist/bot:${GITHUB_REF#refs/tags/}
+              run: kubectl set image deployment/bot bot=ghcr.io/discordextremelist/bot:${GITHUB_REF#refs/tags/}
             - name: Rollout status
               run: kubectl rollout status deployment/bot
