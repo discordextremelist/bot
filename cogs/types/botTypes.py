@@ -1,6 +1,6 @@
 # Discord Extreme List - Discord's unbiased list.
 
-# Copyright (C) 2020 Cairo Mitchell-Acason
+# Copyright (C) 2020-2025 Carolina Mitchell, Advaith Jagathesan, John Burke
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
