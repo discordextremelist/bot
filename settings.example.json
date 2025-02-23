@@ -13,7 +13,8 @@
   "guilds": {
     "main": "",
     "staff": "",
-    "bot": ""
+    "bot": "",
+    "messageLog": ""
   },
   "website": {
     "url": "https://discordextremelist.xyz"
