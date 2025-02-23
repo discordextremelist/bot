@@ -12,7 +12,8 @@
   },
   "guilds": {
     "main": "",
-    "staff": ""
+    "staff": "",
+    "bot": ""
   },
   "website": {
     "url": "https://discordextremelist.xyz"
@@ -29,7 +30,10 @@
     "unlisted": "736732871708115024",
     "fixesBot": "662230379326865429",
     "botpower": "716174811629486141",
-    "subscribers": "703779239400570880"
+    "subscribers": "703779239400570880",
+    "botServer": {
+      "listed": "1342399369311162368"
+    }
   },
   "colours": {
     "awaiting_fixes": "0xf73538",
